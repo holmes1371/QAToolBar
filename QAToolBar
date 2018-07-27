@@ -173,7 +173,8 @@ Function autoHeaderUniquinizerIngestF()
     Call findTradeIdField
     rCount = getRCount
     findTradeIdField
-
+    idColumn = ActiveCell.Column
+    
     For i = 1 To numOfTrades
         If (Len(ActiveCell) > 1 And Len(ActiveCell) < 26) Or (Len(ActiveCell) > 26 And Len(ActiveCell) < 53) Then
             ActiveCell.Value = formatTradeId(rCount)
@@ -193,7 +194,8 @@ Function autoHeaderUniquinizerIngestF()
     
     Application.ScreenUpdating = True
     'Columns.AutoFit
-    ActiveCell.Select
+    ActiveCell.Offset(0, idColumn - 2).Select
+
     
     
 End Function
