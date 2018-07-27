@@ -52,20 +52,20 @@ Function SheetFixIngestF()
     Application.FindFormat.Clear
     Application.ReplaceFormat.Clear
     
-        'Finds and replaces case for TRUE boolean values
-        Cells.Replace What:="TRUE", Replacement:="'true", LookAt:=xlWhole, _
-        SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
-        ReplaceFormat:=False
+    'Finds and replaces case for TRUE boolean values
+    Cells.Replace What:="TRUE", Replacement:="'true", LookAt:=xlWhole, _
+    SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
+    ReplaceFormat:=False
         
-        'Finds and replaces case for FALSE boolean values
-        Cells.Replace What:="FALSE", Replacement:="'false", LookAt:=xlWhole, _
-        SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
-        ReplaceFormat:=False
+    'Finds and replaces case for FALSE boolean values
+    Cells.Replace What:="FALSE", Replacement:="'false", LookAt:=xlWhole, _
+    SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
+    ReplaceFormat:=False
         
-         'Reset match case and entire contents
-        Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
+    'Reset match case and entire contents
+    Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+    SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+    ReplaceFormat:=False
     
     'Clear Formatting
     Application.FindFormat.Clear
@@ -76,6 +76,7 @@ Function SheetFixIngestF()
     
     Columns.AutoFit
     Range(startCell).Select
+    
 End Function
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
     autoHeaderFormatterIngestF
@@ -194,14 +195,16 @@ Function autoHeaderUniquinizerIngestF()
     
     Application.ScreenUpdating = True
     'Columns.AutoFit
-    ActiveCell.Offset(0, idColumn - 2).Select
+    Cells(1, idColumn).Select
+    Selection.End(xlDown).Select
+    ActiveCell.Offset(1, 0).Select
 
     
     
 End Function
 Function exitCheck()
 
-               Dim lastRecordRow As Integer
+        Dim lastRecordRow As Integer
         Dim idColumn As Integer
         
         findTradeIdField
@@ -213,9 +216,8 @@ Function exitCheck()
          Cells.Find(What:="action", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
-        
+        actionColumn = ActiveCell.Column
         Selection.End(xlDown).Select
-        
         lastRecordRow = ActiveCell.Row
                 
         Selection.End(xlUp).Select
@@ -226,20 +228,21 @@ Function exitCheck()
         For i = 3 To lastRecordRow
             If ActiveCell.Value = "exit" Then
                 goback = ActiveCell.Row
-                ActiveCell.Offset(0, -1).Select
+                Cells(goback, 1).Select
+                'ActiveCell.Offset(0, -1).Select
                 tradeName = ActiveCell.Value
                 Columns("A:A").Select
                 Selection.Find(What:=tradeName, After:=ActiveCell, _
                 LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                 SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
              
-                If ActiveCell.Value = tradeName And ActiveCell.Offset(0, 1).Value = "new" Then
+                If ActiveCell.Value = tradeName And ActiveCell.Offset(0, actionColumn - 1).Value = "new" Then
                     ActiveCell.Offset(0, idColumn - 1).Select
                     tradeid = ActiveCell.Value
                     Cells(goback, idColumn).Value = tradeid
                 End If
             
-                Range("B" & goback).Select
+                Cells(goback, actionColumn).Select
             End If
             ActiveCell.Offset(1, 0).Select
          Next i
