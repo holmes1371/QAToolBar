@@ -1,0 +1,40 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui"> 
+    <ribbon startFromScratch="false"> 
+        <tabs> 
+            <tab id="CustomTab" label="QA Toolbar"> 
+                <group id="SimpleControls" label="QA Tools"> 
+                    <button id="Button1"
+                            imageMso="AutoFormat"
+                            size="large"
+                            label="Apply All Formatting"
+                            onAction="ApplyAllFormatting"
+                    />
+                    <button id="Button2"
+                            imageMso="ControlPropertyWidthValue"
+                            size="large"
+                            label="Format Headers"
+                            onAction="autoHeaderIngest"
+                    />
+                    <button id="Button3"
+                            imageMso="CssReports"
+                            size="large"
+                            label="Format Content"
+                            onAction="SheetFixIngest"
+                    />
+                    <button id="Button4"
+                            imageMso="CreateWorkflow"
+                            size="large"
+                            label="Format Header and Content"
+                            onAction="autoHeaderFormatterIngest"
+                    />
+                    <button id="Button5"
+                            imageMso="ControlPropertyDefaultValue"
+                            size="large"
+                            label="Unique Trade IDs"
+                            onAction="autoHeaderUniquinizerIngest"
+                    />
+                </group> 
+            </tab> 
+        </tabs> 
+    </ribbon> 
+</customUI> 
