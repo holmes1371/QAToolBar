@@ -137,7 +137,7 @@ Function autoHeaderFormatterIngestF()
     Application.ReplaceFormat.Clear
     Application.ScreenUpdating = True
 
-   ' Columns.AutoFit
+    Columns.AutoFit
     Range(startCell).Select
     
 End Function
@@ -191,7 +191,7 @@ Function autoHeaderUniquinizerIngestF()
     exitCheck
     
     Application.ScreenUpdating = True
-    'Columns.AutoFit
+    Columns.AutoFit
     Cells(1, idColumn).Select
     Selection.End(xlDown).Select
     ActiveCell.Offset(1, 0).Select
@@ -485,6 +485,3 @@ Function autoHeader2()
         Exit Function
     End If
 End Function
-
-
-
