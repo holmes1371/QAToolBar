@@ -3,14 +3,13 @@
 
 Option Compare Text
 Public endIt
-Public abortIt
 Dim assClass As String
 
 Sub ApplyAllFormatting(control As IRibbonControl)
     SheetFixIngestF
     autoHeaderUniquinizerIngestF
     
-    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
     
 End Sub
 
@@ -150,7 +149,7 @@ End Sub
 Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
-    abortIt = False
+
     endIt = False
     Application.ScreenUpdating = False
     Call autoHeader2
@@ -168,22 +167,10 @@ Function autoHeaderUniquinizerIngestF()
     
     ActiveCell.Offset(1, 0).Select
     assClass = ActiveCell.Value & "_"
-
     
-    findTradeIdField
-    
-    If endIt = True And abortIt = True Then
-        Exit Function
-    End If
-    
+    Call findTradeIdField
     rCount = getRCount
-       
     findTradeIdField
-        
-
-   
-    
-   
     idColumn = ActiveCell.Column
     
     For i = 1 To numOfTrades
@@ -281,18 +268,13 @@ Function findTradeIdField()
     Position(7) = 1153  'CORE CO Template
 
     'Searches through 'Position' array to find the UTI field name in the Core template
-
-
-startOver:
-autoHeader2
-
     For i = 1 To UBound(Position)
-        Cells(1, Position(i)).Select
+        Cells.Find(Position(i)).Select
         fieldName = ActiveCell.Offset(1, 0).Value
-        If ActiveCell.Value = 53 And fieldName = "Trade ID" Then
+        If Position(i) = 53 And fieldName = "Trade ID" Then
             ActiveCell.Offset(2, 0).Select
             Exit For
-        ElseIf ActiveCell.Value = 71 And fieldName = "UTI ID" Then
+        ElseIf Position(i) = 71 And fieldName = "UTI ID" Then
             ActiveCell.Offset(2, 0).Select
             Exit For
         ElseIf fieldName = "UTI" Then
@@ -300,27 +282,9 @@ autoHeader2
            ActiveCell.Offset(2, 0).Select
            Exit For
         Else
-           'do nothing
+            'Do nothing
         End If
     Next i
-    
-    If ActiveCell.Value = Empty Then
-        If endIt = True Then
-            MsgBox "Could not find Trade ID/UTI ID field", vbInformation, "WARNING!"
-            Application.ScreenUpdating = True
-            Cells(1, 1).Select
-            abortIt = True
-            Exit Function
-        End If
-        Rows("1:1").Select
-        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
-        endIt = True
-        GoTo startOver
-    End If
-    
-    
-
-
 End Function
 
 Function formatTradeId(count As Integer) As String
@@ -521,3 +485,4 @@ Function autoHeader2()
         Exit Function
     End If
 End Function
+
