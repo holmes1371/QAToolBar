@@ -3,13 +3,14 @@
 
 Option Compare Text
 Public endIt
+Public abortIt
 Dim assClass As String
 
 Sub ApplyAllFormatting(control As IRibbonControl)
     SheetFixIngestF
     autoHeaderUniquinizerIngestF
     
-    ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
     
 End Sub
 
@@ -140,16 +141,47 @@ Function autoHeaderFormatterIngestF()
     Columns.AutoFit
     Range(startCell).Select
     
+    ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    
 End Function
 
 Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
 End Sub
 
+Sub autoTTC()
+
+    Dim bounds
+    Dim objRange1 As Range
+
+    Range("A1").Select
+    Selection.End(xlDown).Select
+    bounds = ActiveCell.Row
+  
+    'Set up the range
+    Set objRange1 = Range("A1:A" & bounds)
+    
+   'Do the parse
+    objRange1.TextToColumns _
+    Destination:=Range("A1"), _
+    DataType:=xlDelimited, _
+    Tab:=False, _
+    Semicolon:=True, _
+    Comma:=True, _
+    Space:=False, _
+    Other:=False, _
+    OtherChar:=""
+      
+    Columns.AutoFit
+    
+    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    
+End Sub
+
 Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
-
+    abortIt = False
     endIt = False
     Application.ScreenUpdating = False
     Call autoHeader2
@@ -167,10 +199,22 @@ Function autoHeaderUniquinizerIngestF()
     
     ActiveCell.Offset(1, 0).Select
     assClass = ActiveCell.Value & "_"
+
     
-    Call findTradeIdField
-    rCount = getRCount
     findTradeIdField
+    
+    If endIt = True And abortIt = True Then
+        Exit Function
+    End If
+    
+    rCount = getRCount
+       
+    findTradeIdField
+        
+
+   
+    
+   
     idColumn = ActiveCell.Column
     
     For i = 1 To numOfTrades
@@ -208,9 +252,11 @@ Function exitCheck()
         
         
         Range("A1").Select
+Again:
          Cells.Find(What:="action", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
+        If ActiveCell.Value <> "Action" Then GoTo Again
         actionColumn = ActiveCell.Column
         Selection.End(xlDown).Select
         lastRecordRow = ActiveCell.Row
@@ -268,13 +314,18 @@ Function findTradeIdField()
     Position(7) = 1153  'CORE CO Template
 
     'Searches through 'Position' array to find the UTI field name in the Core template
+
+
+startOver:
+autoHeader2
+
     For i = 1 To UBound(Position)
-        Cells.Find(Position(i)).Select
+        Cells(1, Position(i)).Select
         fieldName = ActiveCell.Offset(1, 0).Value
-        If Position(i) = 53 And fieldName = "Trade ID" Then
+        If ActiveCell.Value = 53 And fieldName = "Trade ID" Then
             ActiveCell.Offset(2, 0).Select
             Exit For
-        ElseIf Position(i) = 71 And fieldName = "UTI ID" Then
+        ElseIf ActiveCell.Value = 71 And fieldName = "UTI ID" Then
             ActiveCell.Offset(2, 0).Select
             Exit For
         ElseIf fieldName = "UTI" Then
@@ -282,9 +333,27 @@ Function findTradeIdField()
            ActiveCell.Offset(2, 0).Select
            Exit For
         Else
-            'Do nothing
+           'do nothing
         End If
     Next i
+    
+    If ActiveCell.Value = Empty Then
+        If endIt = True Then
+            MsgBox "Could not find Trade ID/UTI ID field", vbInformation, "WARNING!"
+            Application.ScreenUpdating = True
+            Cells(1, 1).Select
+            abortIt = True
+            Exit Function
+        End If
+        Rows("1:1").Select
+        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+        endIt = True
+        GoTo startOver
+    End If
+    
+    
+
+
 End Function
 
 Function formatTradeId(count As Integer) As String
