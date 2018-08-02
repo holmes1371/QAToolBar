@@ -2,7 +2,7 @@
     <ribbon startFromScratch="false"> 
         <tabs> 
             <tab id="CustomTab" label="QA Toolbar"> 
-                <group id="QATools" label="QA Tools"> 
+                <group id="Formatting" label="Formatting"> 
                     <button id="ApplyAllFormatting"
                             imageMso="AutoFormat"
                             size="large"
@@ -62,6 +62,13 @@
                              sizeString="0"
                              maxLength="1"
                              onChange="OthValue_onChange"
+                    />
+                    <separator id="separator" />
+                    <button id="scrollToUti"
+                            imageMso="AddNewColumnMenu"
+                            size="large"
+                            label="Scroll To UTI"
+                            onAction="findTradeID"
                     />
                 </group>
             </tab> 
