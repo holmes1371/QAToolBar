@@ -1,0 +1,70 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui"> 
+    <ribbon startFromScratch="false"> 
+        <tabs> 
+            <tab id="CustomTab" label="QA Toolbar"> 
+                <group id="QATools" label="QA Tools"> 
+                    <button id="ApplyAllFormatting"
+                            imageMso="AutoFormat"
+                            size="large"
+                            label="Apply All Formatting"
+                            onAction="ApplyAllFormatting"
+                    />
+                    <button id="autoHeaderIngest"
+                            imageMso="ControlPropertyWidthValue"
+                            size="large"
+                            label="Format Headers"
+                            onAction="autoHeaderIngest"
+                    />
+                    <button id="SheetFixIngest"
+                            imageMso="CssReports"
+                            size="large"
+                            label="Format Content"
+                            onAction="SheetFixIngest"
+                    />
+                    <button id="autoHeaderFormatterIngest"
+                            imageMso="CreateWorkflow"
+                            size="large"
+                            label="Format Header and Content"
+                            onAction="autoHeaderFormatterIngest"
+                    />
+                    <button id="autoHeaderUniquinizerIngest"
+                            imageMso="ControlPropertyDefaultValue"
+                            size="large"
+                            label="Unique Trade IDs"
+                            onAction="autoHeaderUniquinizerIngest"
+                    />
+                </group>
+                <group id="Shortcuts" label="Shortcuts">
+                    <button id="textToCol"
+                            imageMso="ConvertTextToTable"
+                            size="large"
+                            label="Delimit Text"
+                            onAction="textToCol"
+                    />
+                    <checkBox id="TabCheckBox"
+                              label="Tab"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="SmcCheckBox"
+                              label="Semicolon"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="CmmCheckBox" 
+                              label="Comma"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="SpaCheckBox" 
+                              label="Space"
+                              onAction="boxChecked"
+                    />
+                    <editBox id="OthValue"
+                             label="Other:"
+                             sizeString="0"
+                             maxLength="1"
+                             onChange="OthValue_onChange"
+                    />
+                </group>
+            </tab> 
+        </tabs> 
+    </ribbon> 
+</customUI> 

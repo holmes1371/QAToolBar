@@ -1,0 +1,44 @@
+'QA Toolbar, v. 1.1
+'Dtd: 08/02/2018
+
+Option Compare Text
+Public endIt
+Public abortIt
+Public assClass As String
+
+Sub ApplyAllFormatting(control As IRibbonControl)
+    SheetFixIngestF
+    autoHeaderUniquinizerIngestF
+    
+    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    
+End Sub
+
+Sub autoHeaderIngest(control As IRibbonControl)
+    Call autoHeader2
+    If endIt = False Then
+        Exit Sub
+    End If
+End Sub
+
+Sub SheetFixIngest(control As IRibbonControl)
+    SheetFixIngestF
+End Sub
+
+
+Sub autoHeaderFormatterIngest(control As IRibbonControl)
+    autoHeaderFormatterIngestF
+End Sub
+
+Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
+    autoHeaderUniquinizerIngestF
+End Sub
+
+Sub findTradeID()
+    findTradeIdField
+    Application.ScreenUpdating = True
+    Columns.AutoFit
+    Selection.End(xlDown).Select
+    ActiveCell.Offset(1, 0).Select
+    
+End Sub
