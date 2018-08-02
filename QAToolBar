@@ -149,33 +149,6 @@ Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
 End Sub
 
-Sub autoTTC()
-
-    Dim bounds
-    Dim objRange1 As Range
-    Dim mylascell
-    
-    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
- 
-    'Set up the range
-    Set objRange1 = Range("A1:A" & mylastcell.Row)
-    
-   'Do the parse
-    objRange1.TextToColumns _
-    Destination:=Range("A1"), _
-    DataType:=xlDelimited, _
-    Tab:=False, _
-    Semicolon:=True, _
-    Comma:=True, _
-    Space:=False, _
-    Other:=False, _
-    OtherChar:=""
-      
-    Columns.AutoFit
-    
-    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
-    
-End Sub
 Sub findTradeID()
     findTradeIdField
     Application.ScreenUpdating = True
