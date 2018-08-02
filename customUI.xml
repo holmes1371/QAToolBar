@@ -2,38 +2,68 @@
     <ribbon startFromScratch="false"> 
         <tabs> 
             <tab id="CustomTab" label="QA Toolbar"> 
-                <group id="SimpleControls" label="QA Tools"> 
-                    <button id="Button1"
+                <group id="QATools" label="QA Tools"> 
+                    <button id="ApplyAllFormatting"
                             imageMso="AutoFormat"
                             size="large"
                             label="Apply All Formatting"
                             onAction="ApplyAllFormatting"
                     />
-                    <button id="Button2"
+                    <button id="autoHeaderIngest"
                             imageMso="ControlPropertyWidthValue"
                             size="large"
                             label="Format Headers"
                             onAction="autoHeaderIngest"
                     />
-                    <button id="Button3"
+                    <button id="SheetFixIngest"
                             imageMso="CssReports"
                             size="large"
                             label="Format Content"
                             onAction="SheetFixIngest"
                     />
-                    <button id="Button4"
+                    <button id="autoHeaderFormatterIngest"
                             imageMso="CreateWorkflow"
                             size="large"
                             label="Format Header and Content"
                             onAction="autoHeaderFormatterIngest"
                     />
-                    <button id="Button5"
+                    <button id="autoHeaderUniquinizerIngest"
                             imageMso="ControlPropertyDefaultValue"
                             size="large"
                             label="Unique Trade IDs"
                             onAction="autoHeaderUniquinizerIngest"
                     />
-                </group> 
+                </group>
+                <group id="Shortcuts" label="Shortcuts">
+                    <button id="textToCol"
+                            imageMso="ConvertTextToTable"
+                            size="large"
+                            label="Delimit Text"
+                            onAction="textToCol"
+                    />
+                    <checkBox id="TabCheckBox"
+                              label="Tab"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="SmcCheckBox"
+                              label="Semicolon"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="CmmCheckBox" 
+                              label="Comma"
+                              onAction="boxChecked"
+                    />
+                    <checkBox id="SpaCheckBox" 
+                              label="Space"
+                              onAction="boxChecked"
+                    />
+                    <editBox id="OthValue"
+                             label="Other:"
+                             sizeString="0"
+                             maxLength="1"
+                             onChange="OthValue_onChange"
+                    />
+                </group>
             </tab> 
         </tabs> 
     </ribbon> 
