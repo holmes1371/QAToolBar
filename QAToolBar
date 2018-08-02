@@ -1,5 +1,5 @@
-'QA Toolbar, v. 1.0
-'Dtd: 07/26/2018
+'QA Toolbar, v. 1.1
+'Dtd: 08/02/2018
 
 Option Compare Text
 Public endIt
@@ -149,32 +149,12 @@ Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
 End Sub
 
-Sub autoTTC()
-
-    Dim bounds
-    Dim objRange1 As Range
-
-    Range("A1").Select
-    Selection.End(xlDown).Select
-    bounds = ActiveCell.Row
-  
-    'Set up the range
-    Set objRange1 = Range("A1:A" & bounds)
-    
-   'Do the parse
-    objRange1.TextToColumns _
-    Destination:=Range("A1"), _
-    DataType:=xlDelimited, _
-    Tab:=False, _
-    Semicolon:=True, _
-    Comma:=True, _
-    Space:=False, _
-    Other:=False, _
-    OtherChar:=""
-      
+Sub findTradeID()
+    findTradeIdField
+    Application.ScreenUpdating = True
     Columns.AutoFit
-    
-    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
+    Selection.End(xlDown).Select
+    ActiveCell.Offset(1, 0).Select
     
 End Sub
 
@@ -211,10 +191,6 @@ Function autoHeaderUniquinizerIngestF()
        
     findTradeIdField
         
-
-   
-    
-   
     idColumn = ActiveCell.Column
     
     For i = 1 To numOfTrades
@@ -296,7 +272,6 @@ Again:
 
 
 End Function
-
 
 Function findTradeIdField()
     Dim i As Integer
