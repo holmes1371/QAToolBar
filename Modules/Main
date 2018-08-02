@@ -2,9 +2,9 @@
 'Dtd: 08/02/2018
 
 Option Compare Text
-Public endIt
+Public endIt               'these are catch variables which allow a function to terminate the sub
 Public abortIt
-Public assClass As String
+
 
 Sub ApplyAllFormatting(control As IRibbonControl)
     SheetFixIngestF
@@ -34,7 +34,7 @@ Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
 End Sub
 
-Sub findTradeID()
+Sub findTradeID(control As IRibbonControl)
     findTradeIdField
     Application.ScreenUpdating = True
     Columns.AutoFit
@@ -42,3 +42,4 @@ Sub findTradeID()
     ActiveCell.Offset(1, 0).Select
     
 End Sub
+
