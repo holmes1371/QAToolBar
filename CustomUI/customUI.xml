@@ -35,6 +35,19 @@
                     />
                 </group>
                 <group id="Shortcuts" label="Shortcuts">
+                    <button id="scrollToUti"
+                            imageMso="AddNewColumnMenu"
+                            size="large"
+                            label="Scroll To UTI"
+                            onAction="findTradeID"
+                    />
+                    <button id="neSplit"
+                            imageMso="AdpDiagramArrangeTables"
+                            size="large"
+                            label="New/Exit Split"
+                            onAction="neSplit"
+                    />
+                    <separator id="separator" />
                     <button id="textToCol"
                             imageMso="ConvertTextToTable"
                             size="large"
@@ -62,13 +75,6 @@
                              sizeString="0"
                              maxLength="1"
                              onChange="OthValue_onChange"
-                    />
-                    <separator id="separator" />
-                    <button id="scrollToUti"
-                            imageMso="AddNewColumnMenu"
-                            size="large"
-                            label="Scroll To UTI"
-                            onAction="findTradeID"
                     />
                 </group>
             </tab> 
