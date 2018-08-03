@@ -1,12 +1,15 @@
 Option Compare Text
+Public assClass As String
 
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
+    
+    
     abortIt = False
     endIt = False
     Application.ScreenUpdating = False
-    Call autoHeader2
+   ' autoHeader2
     
     If endIt = True Then
         Exit Function
@@ -15,50 +18,92 @@ Public Function autoHeaderUniquinizerIngestF()
     Dim i As Integer
     Dim rCount As Integer
     
-    Cells.Find(What:="asset class", After:=ActiveCell, LookIn:=xlFormulas, _
+    
+    'creating Asset Class portion of the UTI / Trade ID
+    'On Error GoTo handleErrorAsset
+    Cells.Find(What:="primary asset class", After:=ActiveCell, LookIn:=xlFormulas, _
     LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
     MatchCase:=False, SearchFormat:=False).Activate
     
-    ActiveCell.Offset(1, 0).Select
-    assClass = ActiveCell.Value & "_"
 
+    ActiveCell.Offset(1, 0).Select
     
+    'AssetClass abbreviations:
+    If ActiveCell.Value = "ForeignExchange" Then
+        assClass = "FX_"
+    ElseIf ActiveCell.Value = "InterestRate" Then
+        assClass = "IR_"
+    ElseIf ActiveCell.Value = "Commodity" Then
+        assClass = "CO_"
+    ElseIf ActiveCell.Value = "Equity" Then
+        assClass = "EQ_"
+    ElseIf ActiveCell.Value = "Credit" Then
+        assClass = "CR_"
+    End If
+    
+
     findTradeIdField
     
-    If endIt = True And abortIt = True Then
+    If endIt = True Then
         Exit Function
     End If
     
     rCount = getRCount
        
     findTradeIdField
-        
+    
     idColumn = ActiveCell.Column
-    
+     
+    'sets the new tradeID
+  
     For i = 1 To numOfTrades
-        If (Len(ActiveCell) > 1 And Len(ActiveCell) < 26) Or (Len(ActiveCell) > 26 And Len(ActiveCell) < 53) Then
             ActiveCell.Value = formatTradeId(rCount)
+            Set getback = ActiveCell
             rCount = getLastFour
             ActiveCell.Offset(1, 0).Select
-
-        ElseIf Len(ActiveCell) = 26 Then
-            ActiveCell.Value = IncrementTradeId(rCount)
-            rCount = getLastFour
-            ActiveCell.Offset(1, 0).Select
-        Else
-            ActiveCell.Offset(1, 0).Select
-        End If
     Next i
-    
+
+    'does exit trade check.
     exitCheck
+    'copies UTI to USI in CORE templates
+    usiCheck (idColumn)
+    
+    If endIt = True Then
+        Exit Function
+    End If
     
     Application.ScreenUpdating = True
     Columns.AutoFit
+    
+    'brings the active cell to the bottom of the TradeID column
     Cells(1, idColumn).Select
     Selection.End(xlDown).Select
     ActiveCell.Offset(1, 0).Select
+
+    Exit Function
+    
+handleErrorAsset:
+    MsgBox "No 'Primary Asset Class' field was found", vbInformation, "WARNING!"
+    Exit Function
+   
+End Function
+Function usiCheck(idColumn)
+
+    findIt ("USI Value")
+    If usiActive = True Then
+            ActiveCell.Offset(1, 0).Select
+            Set searchPosition = ActiveCell
+            thisRow = ActiveCell.Row
+            Cells(thisRow, idColumn).Select
+            Range(Selection, Selection.End(xlDown)).Select
+            Selection.Copy
+            Cells(searchPosition.Row, searchPosition.Column).Select
+            ActiveSheet.Paste
+            Application.CutCopyMode = False
+    End If
     
 End Function
+
 Function exitCheck()
 
         Dim lastRecordRow As Integer
@@ -67,12 +112,12 @@ Function exitCheck()
         findTradeIdField
         idColumn = ActiveCell.Column
         
-        
-        
         Range("A1").Select
+        
+On Error GoTo handleErrorAction
 Again:
-         Cells.Find(What:="action", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
-        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        Cells.Find(What:="action", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
         If ActiveCell.Value <> "Action" Then GoTo Again
         actionColumn = ActiveCell.Column
@@ -81,14 +126,11 @@ Again:
                 
         Selection.End(xlUp).Select
         ActiveCell.Offset(2, 0).Select
-
-        
         
         For i = 3 To lastRecordRow
             If ActiveCell.Value = "exit" Then
                 goback = ActiveCell.Row
                 Cells(goback, 1).Select
-                'ActiveCell.Offset(0, -1).Select
                 tradeName = ActiveCell.Value
                 Columns("A:A").Select
                 Selection.Find(What:=tradeName, After:=ActiveCell, _
@@ -111,66 +153,29 @@ Again:
         Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
         SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
         ReplaceFormat:=False
-
+        
+    Exit Function
+    
+handleErrorAction:
+     MsgBox "No 'Action' field was found", vbInformation, "WARNING!"
+    'Reset match case and entire contents
+     Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+     ReplaceFormat:=False
+     endIt = True
+     Exit Function
 
 End Function
 
 Public Function findTradeIdField()
-    Dim i As Integer
-    Dim fieldName As String
-    Dim Position(7) As Integer      'Declares an array called Position with 7 elements
-    
-    'Assigns values to each element within the Position Array. Values were taken from
-    'each of the submission templates based on TradeId position.
-    Position(1) = 53    'EU Lite Template
-    Position(2) = 71    'Harmonized Template
-    Position(3) = 161   'CORE EQ Template
-    Position(4) = 244   'CORE CR Template
-    Position(5) = 261   'CORE FX(CU) Template
-    Position(6) = 580   'CORE IR Template
-    Position(7) = 1153  'CORE CO Template
 
-    'Searches through 'Position' array to find the UTI field name in the Core template
-
-
-startOver:
-autoHeader2
-
-    For i = 1 To UBound(Position)
-        Cells(1, Position(i)).Select
-        fieldName = ActiveCell.Offset(1, 0).Value
-        If ActiveCell.Value = 53 And fieldName = "Trade ID" Then
-            ActiveCell.Offset(2, 0).Select
-            Exit For
-        ElseIf ActiveCell.Value = 71 And fieldName = "UTI ID" Then
-            ActiveCell.Offset(2, 0).Select
-            Exit For
-        ElseIf fieldName = "UTI" Then
-           assClass = Switch(i = 3, "EQ_", i = 4, "CR_", i = 5, "FX_", i = 6, "IR_", i = 7, "CO_")
-           ActiveCell.Offset(2, 0).Select
-           Exit For
-        Else
-           'do nothing
-        End If
-    Next i
-    
-    If ActiveCell.Value = Empty Then
-        If endIt = True Then
-            MsgBox "Could not find Trade ID/UTI ID field", vbInformation, "WARNING!"
-            Application.ScreenUpdating = True
-            Cells(1, 1).Select
-            abortIt = True
-            Exit Function
-        End If
-        Rows("1:1").Select
-        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    findID
+    If foundOne = True Then
+        ActiveCell.Offset(1, 0).Select
+    Else
         endIt = True
-        GoTo startOver
     End If
-    
-    
-
-
+        
 End Function
 
 Function formatTradeId(count As Integer) As String
@@ -182,8 +187,8 @@ Function formatTradeId(count As Integer) As String
 
     harn = "HARNESS_AUTO_"
     dt = todaysDate
-    newFour = count + 1                    'Adds 1 to the current count
-    counter = Format(newFour, "0000")      'Formats counter to 4 digits
+    newFour = count + 1                               'Adds 1 to the current count
+    counter = Format(newFour, "0000")                 'Formats counter to 4 digits
     tradeid = harn & assClass & dt & "_" & counter    'Concatenates new tradeId
     formatTradeId = tradeid
     
@@ -206,7 +211,7 @@ Function IncrementTradeId(count As Integer) As String
     counter = CStr(cFour)
     
     newTradeId = harn & assClass & dt & "_" & counter   'Concatenate tradeId
-    IncrementTradeId = newTradeId           'Post new tradeId
+    IncrementTradeId = newTradeId                       'Post new tradeId
 End Function
 
 Function getRCount()

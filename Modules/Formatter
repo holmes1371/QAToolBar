@@ -18,9 +18,9 @@ Public Function SheetFixIngestF()
      Application.FindFormat.NumberFormat = "m/d/yyyy"
      Application.ReplaceFormat.NumberFormat = "yyyy-mm-dd;@"
     
-        'Find and replace date formatting based on above defined formatting
-        Cells.Replace What:="", Replacement:="", LookAt:=xlWhole, SearchOrder:= _
-        xlByRows, SearchFormat:=True, ReplaceFormat:=True
+    'Find and replace date formatting based on above defined formatting
+    Cells.Replace What:="", Replacement:="", LookAt:=xlWhole, SearchOrder:= _
+    xlByRows, SearchFormat:=True, ReplaceFormat:=True
     
     'Clear formatting
     Application.FindFormat.Clear

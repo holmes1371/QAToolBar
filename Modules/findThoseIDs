@@ -1,0 +1,69 @@
+Public searchPosition
+Public foundOne
+Public usiActive
+
+
+Public Sub findID()
+
+foundOne = False
+    
+    findIt ("UTI")
+    findIt ("UTI ID")
+        
+   If foundOne = False Then
+        MsgBox "Could not find UTI ID/UTI field", vbInformation, "WARNING!"
+        Application.ScreenUpdating = True
+        Cells(1, 1).Select
+        
+       'Reset match case and entire contents
+        Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+  
+       Exit Sub
+   End If
+    
+    Cells(searchPosition.Row, searchPosition.Column).Select
+
+End Sub
+Public Function findIt(findThis)
+
+usiActive = False
+
+On Error GoTo handler
+        Cells.Find(What:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        True, SearchFormat:=False).Activate
+        
+        Set searchPosition = ActiveCell
+        foundOne = True
+        
+        If findThis = "USI Value" Then
+            foundOne = False
+            usiActive = True
+        End If
+        
+        Exit Function
+        
+handler:
+    Exit Function
+
+End Function
+
+Private Function findUSI()
+
+On Error GoTo handler
+        Cells.Find(What:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        True, SearchFormat:=False).Activate
+        
+        Set searchPosition = ActiveCell
+        findUSI = searchPosition.Column
+        Exit Function
+        
+handler:
+    Exit Function
+
+End Function
+
+
