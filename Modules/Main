@@ -39,11 +39,14 @@ Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
 End Sub
 
 Sub findTradeID(control As IRibbonControl)
-    findTradeIdField
-    Application.ScreenUpdating = True
-    Columns.AutoFit
-    Selection.End(xlDown).Select
-    ActiveCell.Offset(1, 0).Select
+    
+    findID
+    If foundOne = True Then
+        Application.ScreenUpdating = True
+        Columns.AutoFit
+        Selection.End(xlDown).Select
+        ActiveCell.Offset(1, 0).Select
+    End If
     
 End Sub
 
