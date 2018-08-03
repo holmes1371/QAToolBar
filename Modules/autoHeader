@@ -6,13 +6,13 @@ Public Function autoHeader2()
 ' Emotional counselor: Frank
 
     Application.ScreenUpdating = False
-    Dim lastrecord
     Dim commentLocation
     Dim foundIt
     Dim count
     
     foundIt = False
     count = 0
+    startCell = ActiveCell.Address
     
     'checks to see if the sheet is already formatted
     If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
@@ -22,6 +22,7 @@ Public Function autoHeader2()
         
     
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
+        
     Range("A1").Select
     
     'prevents formatting if more than one cell in row 1 is "*comment"
@@ -39,10 +40,11 @@ Public Function autoHeader2()
         Range("A1").Select
         Exit Function
     End If
+    
     Range("A1").Select
     
     For i = 1 To mylastcell.Row
-        If ActiveCell.Value = "*comment" Then
+        If ActiveCell.Value = "*comment" Then  'formatting check. Will only apply the header if "*Comment" is found
         commentLocation = ActiveCell.Row
         foundIt = True
         Exit For
@@ -50,7 +52,7 @@ Public Function autoHeader2()
         ActiveCell.Offset(1, 0).Select
     Next i
     
-    If foundIt = True Then
+    If foundIt = True Then                    'will perform the formatting if "*Comment" was found
         
         If commentLocation <> 1 Then
             commentLocation = commentLocation - 1
@@ -59,27 +61,27 @@ Public Function autoHeader2()
         End If
             
         Range("A1").Select
-        ActiveCell.Value = "*Comment" 'ensures comment is capitalized
-        Selection.End(xlToRight).Select
-        endColumn = ActiveCell.Column
+        ActiveCell.Value = "*Comment"        'ensures comment is capitalized
         Rows("1:1").Select
         Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
                 
         Range("A1").Select
         ActiveCell.FormulaR1C1 = "*1"
          
-        For i = 2 To endColumn
+        For i = 2 To mylastcell.Column
             ActiveCell.Offset(0, 1).Select
             ActiveCell.Value = i
         Next i
         
-        Range("A1").Select
+        Range(startCell).Select
     Else
         Range("A1").Select
-        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct form you want to format", vbInformation, "WARNING!"
+        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", vbInformation, "WARNING!"
         Application.ScreenUpdating = True
         Range("A1").Select
         endIt = True
         Exit Function
     End If
 End Function
+
+
