@@ -9,7 +9,7 @@ Public abortIt
 Sub ApplyAllFormatting(control As IRibbonControl)
     SheetFixIngestF
     autoHeaderUniquinizerIngestF
-    
+    resetSearchParameters
     'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
     
 End Sub
@@ -19,10 +19,12 @@ Sub autoHeaderIngest(control As IRibbonControl)
     If endIt = False Then
         Exit Sub
     End If
+    resetSearchParameters
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
     SheetFixIngestF
+    resetSearchParameters
 End Sub
 
 
@@ -32,10 +34,12 @@ Sub autoHeaderFormatterIngest(control As IRibbonControl)
     If endIt = False Then
        Exit Sub
     End If
+    resetSearchParameters
 End Sub
 
 Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
+    resetSearchParameters
 End Sub
 
 Sub findTradeID(control As IRibbonControl)
@@ -44,9 +48,16 @@ Sub findTradeID(control As IRibbonControl)
     If foundOne = True Then
         Application.ScreenUpdating = True
         Columns.AutoFit
-        Selection.End(xlDown).Select
-        ActiveCell.Offset(1, 0).Select
     End If
+    resetSearchParameters
     
 End Sub
+Public Function resetSearchParameters() 'run this function at the end of each "Main" sub
+
+        'Reset match case and entire contents
+        Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+End Function
 
