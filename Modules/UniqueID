@@ -1,15 +1,21 @@
 Option Compare Text
 Public assClass As String
+Public mylastcell
+
+
 
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
+       
+    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     
     
+    SheetFixIngestF
     abortIt = False
     endIt = False
-    Application.ScreenUpdating = False
-   ' autoHeader2
+    Application.ScreenUpdating = False 'set to false after debug
+   
     
     If endIt = True Then
         Exit Function
@@ -20,8 +26,8 @@ Public Function autoHeaderUniquinizerIngestF()
     
     
     'creating Asset Class portion of the UTI / Trade ID
-    'On Error GoTo handleErrorAsset
-    Cells.Find(What:="primary asset class", After:=ActiveCell, LookIn:=xlFormulas, _
+    On Error GoTo handleErrorAsset
+    Cells.find(What:="primary asset class", After:=ActiveCell, LookIn:=xlFormulas, _
     LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
     MatchCase:=False, SearchFormat:=False).Activate
     
@@ -106,53 +112,48 @@ End Function
 
 Function exitCheck()
 
-        Dim lastRecordRow As Integer
+       
         Dim idColumn As Integer
-        
         findTradeIdField
         idColumn = ActiveCell.Column
-        
+       
         Range("A1").Select
         
 On Error GoTo handleErrorAction
-Again:
-        Cells.Find(What:="action", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
-        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
-        False, SearchFormat:=False).Activate
-        If ActiveCell.Value <> "Action" Then GoTo Again
-        actionColumn = ActiveCell.Column
-        Selection.End(xlDown).Select
-        lastRecordRow = ActiveCell.Row
-                
-        Selection.End(xlUp).Select
-        ActiveCell.Offset(2, 0).Select
         
-        For i = 3 To lastRecordRow
+        find ("action")
+        actionColumn = ActiveCell.Column
+        headerRow = ActiveCell.Row
+        ActiveCell.Offset(1, 0).Select
+        
+        For i = headerRow To mylastcell.Row
             If ActiveCell.Value = "exit" Then
-                goback = ActiveCell.Row
-                Cells(goback, 1).Select
-                tradeName = ActiveCell.Value
+                exitTradeRow = ActiveCell.Row
+                tradeName = Cells(exitTradeRow, 1).Value
                 Columns("A:A").Select
-                Selection.Find(What:=tradeName, After:=ActiveCell, _
+
+                Selection.find(What:=tradeName, After:=ActiveCell, _
                 LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
-                SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
-             
+                SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
+                
+                If ActiveCell.Row = exitTradeRow Then
+                    Selection.find(What:=tradeName, After:=ActiveCell, _
+                    LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
+                    SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
+                End If
+            
                 If ActiveCell.Value = tradeName And ActiveCell.Offset(0, actionColumn - 1).Value = "new" Then
                     ActiveCell.Offset(0, idColumn - 1).Select
                     tradeid = ActiveCell.Value
-                    Cells(goback, idColumn).Value = tradeid
+                    Cells(exitTradeRow, idColumn).Value = tradeid
                 End If
             
-                Cells(goback, actionColumn).Select
+                Cells(exitTradeRow, actionColumn).Select
             End If
             ActiveCell.Offset(1, 0).Select
          Next i
-        
-        
-        'Reset match case and entire contents
-        Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
+      
+    resetSearchParameters
         
     Exit Function
     
@@ -288,8 +289,8 @@ End Function
 
 Function numOfTrades() As Integer
     'Returns the actual number of trades by subtracting the header rows from the
-    'total rows and returning the differnce
-    numOfTrades = totalNumRows - headerCount
+    'total rows and returning the difference
+    numOfTrades = mylastcell.Row - headerCount
     Debug.Print numOfTrades
 End Function
 
