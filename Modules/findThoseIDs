@@ -1,69 +1,87 @@
-Public searchPosition
-Public foundOne
-Public usiActive
+Option Compare Text
 
+Public Function autoHeader2()
 
-Public Sub findID()
+' Developed by Tom Holmes tholmes@dtcc.com
+' Emotional counselor: Frank
 
-foundOne = False
+    Application.ScreenUpdating = False
+    Dim commentLocation
+    Dim foundIt
+    Dim count
     
-    findIt ("UTI")
-    findIt ("UTI ID")
-        
-   If foundOne = False Then
-        MsgBox "Could not find UTI ID/UTI field", vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
-        Cells(1, 1).Select
-        
-       'Reset match case and entire contents
-        Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
-        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
-        ReplaceFormat:=False
-  
-       Exit Sub
-   End If
+    foundIt = False
+    count = 0
+    startCell = ActiveCell.Address
     
-    Cells(searchPosition.Row, searchPosition.Column).Select
-
-End Sub
-Public Function findIt(findThis)
-
-usiActive = False
-
-On Error GoTo handler
-        Cells.Find(What:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
-        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
-        True, SearchFormat:=False).Activate
+    'checks to see if the sheet is already formatted
+    If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
+        Range("A2").Value = "*Comment"
+        Exit Function
+    End If
         
-        Set searchPosition = ActiveCell
-        foundOne = True
+    
+    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
         
-        If findThis = "USI Value" Then
-            foundOne = False
-            usiActive = True
+    Range("A1").Select
+    
+    'prevents formatting if more than one cell in row 1 is "*comment"
+    For i = 1 To mylastcell.Row
+        If (ActiveCell.Value = "*comment") Or (ActiveCell.Value = "comment") Then
+            count = count + 1
         End If
-        
+         ActiveCell.Offset(1, 0).Select
+    Next i
+    
+    If count >= 2 Then
+        Application.ScreenUpdating = True
+        MsgBox "More than one 'comment' found in row 1. Please verify", vbInformation, "WARNING!"
+        endIt = True
+        Range("A1").Select
         Exit Function
+    End If
+    
+    Range("A1").Select
+    
+    For i = 1 To mylastcell.Row
+        If ActiveCell.Value = "*comment" Then  'formatting check. Will only apply the header if "*Comment" is found
+        commentLocation = ActiveCell.Row
+        foundIt = True
+        Exit For
+        End If
+        ActiveCell.Offset(1, 0).Select
+    Next i
+    
+    If foundIt = True Then                    'will perform the formatting if "*Comment" was found
         
-handler:
-    Exit Function
-
-End Function
-
-Private Function findUSI()
-
-On Error GoTo handler
-        Cells.Find(What:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
-        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
-        True, SearchFormat:=False).Activate
+        If commentLocation <> 1 Then
+            commentLocation = commentLocation - 1
+            Rows("1:" & commentLocation).Select
+            Selection.Delete Shift:=xlUp
+        End If
+            
+        Range("A1").Select
+        ActiveCell.Value = "*Comment"        'ensures comment is capitalized
+        Rows("1:1").Select
+        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+                
+        Range("A1").Select
+        ActiveCell.FormulaR1C1 = "*1"
+         
+        For i = 2 To mylastcell.Column
+            ActiveCell.Offset(0, 1).Select
+            ActiveCell.Value = i
+        Next i
         
-        Set searchPosition = ActiveCell
-        findUSI = searchPosition.Column
+        Range(startCell).Select
+    Else
+        Range("A1").Select
+        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", vbInformation, "WARNING!"
+        Application.ScreenUpdating = True
+        Range("A1").Select
+        endIt = True
         Exit Function
-        
-handler:
-    Exit Function
-
+    End If
 End Function
 
 
