@@ -1,87 +1,76 @@
-Option Compare Text
+Public searchPosition
+Public foundOne
+Public usiActive
 
-Public Function autoHeader2()
 
-' Developed by Tom Holmes tholmes@dtcc.com
-' Emotional counselor: Frank
+Public Sub findID()
 
-    Application.ScreenUpdating = False
-    Dim commentLocation
-    Dim foundIt
-    Dim count
+foundOne = False
     
-    foundIt = False
-    count = 0
-    startCell = ActiveCell.Address
-    
-    'checks to see if the sheet is already formatted
-    If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
-        Range("A2").Value = "*Comment"
-        Exit Function
-    End If
+    findIt ("UTI")
+    findIt ("UTI ID")
         
-    
-    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
-        
-    Range("A1").Select
-    
-    'prevents formatting if more than one cell in row 1 is "*comment"
-    For i = 1 To mylastcell.Row
-        If (ActiveCell.Value = "*comment") Or (ActiveCell.Value = "comment") Then
-            count = count + 1
-        End If
-         ActiveCell.Offset(1, 0).Select
-    Next i
-    
-    If count >= 2 Then
+   If foundOne = False Then
+        MsgBox "Could not find UTI ID/UTI field", vbInformation, "WARNING!"
         Application.ScreenUpdating = True
-        MsgBox "More than one 'comment' found in row 1. Please verify", vbInformation, "WARNING!"
-        endIt = True
-        Range("A1").Select
-        Exit Function
-    End If
-    
-    Range("A1").Select
-    
-    For i = 1 To mylastcell.Row
-        If ActiveCell.Value = "*comment" Then  'formatting check. Will only apply the header if "*Comment" is found
-        commentLocation = ActiveCell.Row
-        foundIt = True
-        Exit For
-        End If
-        ActiveCell.Offset(1, 0).Select
-    Next i
-    
-    If foundIt = True Then                    'will perform the formatting if "*Comment" was found
+        Cells(1, 1).Select
         
-        If commentLocation <> 1 Then
-            commentLocation = commentLocation - 1
-            Rows("1:" & commentLocation).Select
-            Selection.Delete Shift:=xlUp
-        End If
-            
-        Range("A1").Select
-        ActiveCell.Value = "*Comment"        'ensures comment is capitalized
-        Rows("1:1").Select
-        Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
-                
-        Range("A1").Select
-        ActiveCell.FormulaR1C1 = "*1"
-         
-        For i = 2 To mylastcell.Column
-            ActiveCell.Offset(0, 1).Select
-            ActiveCell.Value = i
-        Next i
+    resetSearchParameters
+  
+       Exit Sub
+   End If
+    
+    Cells(searchPosition.Row, searchPosition.Column).Select
+
+End Sub
+Public Function findIt(findThis)
+
+usiActive = False
+
+On Error GoTo handler
+        Cells.find(What:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        True, SearchFormat:=False).Activate
         
-        Range(startCell).Select
-    Else
-        Range("A1").Select
-        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
-        Range("A1").Select
-        endIt = True
+        Set searchPosition = ActiveCell
+        foundOne = True
+        
+        If findThis = "USI Value" Then
+            foundOne = False
+            usiActive = True
+        End If
+        
         Exit Function
-    End If
+        
+handler:
+    Exit Function
+
+End Function
+
+Private Function findUSI()
+
+On Error GoTo handler
+
+        Cells.find(What:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        True, SearchFormat:=False).Activate
+        
+        Set searchPosition = ActiveCell
+        findUSI = searchPosition.Column
+        
+        Exit Function
+        
+handler:
+    Exit Function
+
+End Function
+
+Public Function find(this)
+
+        Cells.find(What:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False).Activate
+        
 End Function
 
 
