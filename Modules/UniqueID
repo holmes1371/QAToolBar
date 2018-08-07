@@ -9,44 +9,15 @@ Public Function autoHeaderUniquinizerIngestF()
 ' May 12, 2018
        
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
-    
-    
+   
     SheetFixIngestF
     abortIt = False
     endIt = False
     Application.ScreenUpdating = False 'set to false after debug
-   
-    
-    If endIt = True Then
-        Exit Function
-    End If
-       
+      
     Dim i As Integer
     Dim rCount As Integer
-    
-    
-    'creating Asset Class portion of the UTI / Trade ID
-    On Error GoTo handleErrorAsset
-    Cells.find(What:="primary asset class", After:=ActiveCell, LookIn:=xlFormulas, _
-    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
-    MatchCase:=False, SearchFormat:=False).Activate
-    
-
-    ActiveCell.Offset(1, 0).Select
-    
-    'AssetClass abbreviations:
-    If ActiveCell.Value = "ForeignExchange" Then
-        assClass = "FX_"
-    ElseIf ActiveCell.Value = "InterestRate" Then
-        assClass = "IR_"
-    ElseIf ActiveCell.Value = "Commodity" Then
-        assClass = "CO_"
-    ElseIf ActiveCell.Value = "Equity" Then
-        assClass = "EQ_"
-    ElseIf ActiveCell.Value = "Credit" Then
-        assClass = "CR_"
-    End If
-    
+      
 
     findTradeIdField
     
@@ -63,10 +34,15 @@ Public Function autoHeaderUniquinizerIngestF()
     'sets the new tradeID
   
     For i = 1 To numOfTrades
-            ActiveCell.Value = formatTradeId(rCount)
-            Set getback = ActiveCell
+            ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
             rCount = getLastFour
             ActiveCell.Offset(1, 0).Select
+            
+            If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
+            
+            If endIt = True Then
+                 Exit Function
+            End If
     Next i
 
     'does exit trade check.
@@ -88,11 +64,68 @@ Public Function autoHeaderUniquinizerIngestF()
 
     Exit Function
     
-handleErrorAsset:
-    MsgBox "No 'Primary Asset Class' field was found", vbInformation, "WARNING!"
-    Exit Function
    
 End Function
+Function spillOverCheck()
+
+'this function prevents a possible error of creating extra UTI ID's
+'due to hidden characters in an excel spreadsheet that cannot be deleted.
+
+    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) = 0 Then
+        spillOverCheck = True
+    End If
+   
+End Function
+Function getAssClass(currentRow)
+ 'creating Asset Class portion of the UTI / Trade ID
+On Error GoTo handleErrorAsset
+    
+    Set ThisCell = ActiveCell       'remembering active cell
+    find ("primary asset class")
+    pacColumn = ActiveCell.Column
+    ThisCell.Select                 'returning to active cell after getting the PAC column
+   
+    
+    'AssetClass abbreviations:
+    If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Then
+        getAssClass = "FX_"
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "InterestRate" Then
+        getAssClass = "IR_"
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Commodity" Then
+        getAssClass = "CO_"
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Equity" Then
+        getAssClass = "EQ_"
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Credit" Then
+        getAssClass = "CR_"
+    Else
+        getAssClass = "??_"
+    End If
+    Exit Function
+    
+handleErrorAsset:
+    MsgBox "No 'Primary Asset Class' field was found", vbInformation, "WARNING!"
+    endIt = True
+    Exit Function
+    
+End Function
+
+Function formatTradeId(count As Integer, currentRow) As String
+
+    Dim harn As String
+    Dim counter As String
+    Dim newFour As Integer
+    Dim dt As String
+
+    harn = "HARNESS_AUTO_"
+    dt = todaysDate
+    newFour = count + 1                                              'Adds 1 to the current count
+    counter = Format(newFour, "0000")                                'Formats counter to 4 digits
+    tradeid = harn & getAssClass(currentRow) & dt & "_" & counter    'Concatenates new tradeId
+    formatTradeId = tradeid
+    
+End Function
+
+
 Function usiCheck(idColumn)
 
     findIt ("USI Value")
@@ -112,7 +145,6 @@ End Function
 
 Function exitCheck()
 
-       
         Dim idColumn As Integer
         findTradeIdField
         idColumn = ActiveCell.Column
@@ -122,12 +154,12 @@ Function exitCheck()
 On Error GoTo handleErrorAction
         
         find ("action")
-        actionColumn = ActiveCell.Column
+        actioncolumn = ActiveCell.Column
         headerRow = ActiveCell.Row
         ActiveCell.Offset(1, 0).Select
         
         For i = headerRow To mylastcell.Row
-            If ActiveCell.Value = "exit" Then
+            If Trim(ActiveCell.Value) = "exit" Then
                 exitTradeRow = ActiveCell.Row
                 tradeName = Cells(exitTradeRow, 1).Value
                 Columns("A:A").Select
@@ -141,14 +173,15 @@ On Error GoTo handleErrorAction
                     LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                     SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
                 End If
-            
-                If ActiveCell.Value = tradeName And ActiveCell.Offset(0, actionColumn - 1).Value = "new" Then
+ 
+                If ActiveCell.Value = tradeName And Trim(Cells(ActiveCell.Row, actioncolumn).Value) = _
+                 "new" Then
                     ActiveCell.Offset(0, idColumn - 1).Select
                     tradeid = ActiveCell.Value
                     Cells(exitTradeRow, idColumn).Value = tradeid
                 End If
             
-                Cells(exitTradeRow, actionColumn).Select
+                Cells(exitTradeRow, actioncolumn).Select
             End If
             ActiveCell.Offset(1, 0).Select
          Next i
@@ -179,59 +212,16 @@ Public Function findTradeIdField()
         
 End Function
 
-Function formatTradeId(count As Integer) As String
-
-    Dim harn As String
-    Dim counter As String
-    Dim newFour As Integer
-    Dim dt As String
-
-    harn = "HARNESS_AUTO_"
-    dt = todaysDate
-    newFour = count + 1                               'Adds 1 to the current count
-    counter = Format(newFour, "0000")                 'Formats counter to 4 digits
-    tradeid = harn & assClass & dt & "_" & counter    'Concatenates new tradeId
-    formatTradeId = tradeid
-    
-End Function
-
-Function IncrementTradeId(count As Integer) As String
-
-    Dim harn As String
-    Dim counter As String
-    Dim currFour As Integer
-    Dim dt As String
-   
-   
-    tradeid = ActiveCell.Value              'Save the value to the variable Val
-  
-    harn = getTradeIdPrefix                 'Extract the first 13 digits of tradeId
-    dt = todaysDate                         'Gets todays date and saves to dt
-    newFour = count + 1                     'Adds 1 to the current count
-    cFour = Format(newFour, "0000")         'Increment counter by 1
-    counter = CStr(cFour)
-    
-    newTradeId = harn & assClass & dt & "_" & counter   'Concatenate tradeId
-    IncrementTradeId = newTradeId                       'Post new tradeId
-End Function
-
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
-    Dim today As String
-   
-    today = todaysDate
     
     For i = 1 To numOfTrades
         If ActiveCell.Value <> Empty Then
-            If tradeIdDate = today Then
-                currCount = getLastFour
-                If currCount > runningCounter Then
-                    runningCounter = currCount
-                    ActiveCell.Offset(1, 0).Select
-                Else
-                    ActiveCell.Offset(1, 0).Select
-                End If
+            currCount = getLastFour
+            If currCount > runningCounter Then
+                runningCounter = currCount
+                ActiveCell.Offset(1, 0).Select
             Else
                 ActiveCell.Offset(1, 0).Select
             End If
@@ -258,10 +248,9 @@ Function getTradeIdPrefix()
 End Function
 
 Function tradeIdDate()
-   
     Dim moveIt As Integer
     tradeid = ActiveCell.Value                          'Save the value to the variable tradeId
-    datePortion = Mid(tradeid, 14 + Len(assClass), 8)   'Extract the Date from trade Id
+    datePortion = Mid(tradeid, 16, 8)                   'Extract the Date from trade Id
     tradeIdDate = datePortion                           'Saves date as string to function
 End Function
 
@@ -293,4 +282,3 @@ Function numOfTrades() As Integer
     numOfTrades = mylastcell.Row - headerCount
     Debug.Print numOfTrades
 End Function
-
