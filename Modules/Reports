@@ -1,5 +1,6 @@
-Dim IE As Object
-Dim gtrUrl As String
+Dim IE      As Object
+Dim gtrUrl  As String
+Dim optElem As String
 
 Declare Function apiShowWindow Lib "user32" Alias "ShowWindow" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
 Global Const SW_SHOWNORMAL = 1
@@ -9,7 +10,8 @@ Global Const SW_MAXIMIZE = 3
 
 Sub PullReports(control As IRibbonControl)
     Set IE = CreateObject("InternetExplorer.Application")
-    gtrUrl = <URL GOES HERE>
+    optElem = "signonWorkflowValue"
+    gtrUrl = "https://gtr.globalq.dtcc.com/dsr-nl-qaf-cl/sdr/action/DSSignon"
     
     With IE
         .Toolbar = False
@@ -21,20 +23,39 @@ Sub PullReports(control As IRibbonControl)
     While IE.readyState <> 4 Or IE.Busy: DoEvents: Wend
     apiShowWindow IE.hwnd, SW_MAXIMIZE
     IE.Visible = True
-    
-    Dim roleObj As Object
 
-    Do
-        Set roleObj = Nothing
-        On Error Resume Next
-        Set roleObj = IE.document.getElementById("signonWorkflowValue")
-        On Error GoTo 0
-        DoEvents
-    Loop While roleObj Is Nothing
-    
-    roleObj.Options(3).Selected = True
-    IE.document.Forms(0).Submit
-    
+    Call webDriver("opt", IE, 3, optElem)
+    Call webDriver("opt", IE, 1, optElem)
+    Call webDriver("txt", IE, "AIXDEALER4", optElem)
+    Call webDriver("opt", IE, 3, optElem)
+            
     Set IE = Nothing
+End Sub
+
+Sub webDriver(oper, ieObj, val, elem)
+    Dim obj As Object
+    
+    While ieObj.readyState <> 4 Or IE.Busy: DoEvents: Wend
+    
+    Do
+        Set obj = Nothing
+        On Error Resume Next
+        If oper = "opt" Then
+            Set obj = ieObj.document.getElementById(elem).Options(val)
+            On Error GoTo 0
+            DoEvents
+            obj.Selected = True
+        ElseIf oper = "txt" Then
+            Set obj = ieObj.document.getElementsByName(elem)(0)
+            On Error GoTo 0
+            DoEvents
+            obj.Value = val
+        End If
+
+    Loop While obj Is Nothing
+    
+    While ieObj.readyState <> 4 Or ieObj.Busy: DoEvents: Wend
+    
+    ieObj.document.forms(0).submit
 End Sub
 
