@@ -1,17 +1,23 @@
 Public Function trimmer() 'trims leading and trailing spaces out of the header
+
+Application.ScreenUpdating = False
+Set startcell = ActiveCell
+
 On Error GoTo niceExit:
     Cells.find(What:="*comment", After:=ActiveCell, LookIn:=xlValues, LookAt _
     :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
     False, SearchFormat:=False).Activate
     
     Do While ActiveCell.Value <> Empty
-        'temp = Trim(ActiveCell.Value)
-        'ActiveCell.Value = temp
         ActiveCell.Value = Trim(ActiveCell.Value)
         ActiveCell.Offset(0, 1).Activate
     Loop
-
+    
 niceExit:
-   Exit Function
+
+    startcell.Activate
+    Exit Function
+   
     
 End Function
+
