@@ -1,8 +1,5 @@
 Option Compare Text
-Public assClass As String
 Public mylastcell
-
-
 
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
@@ -18,12 +15,10 @@ Public Function autoHeaderUniquinizerIngestF()
     Dim i As Integer
     Dim rCount As Integer
       
-
+    findAssetClass
     findTradeIdField
     
-    If endIt = True Then
-        Exit Function
-    End If
+    If endIt = True Then Exit Function
     
     rCount = getRCount
        
@@ -40,9 +35,7 @@ Public Function autoHeaderUniquinizerIngestF()
             
             If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
             
-            If endIt = True Then
-                 Exit Function
-            End If
+            If endIt = True Then Exit Function
     Next i
 
     'does exit trade check.
@@ -50,9 +43,7 @@ Public Function autoHeaderUniquinizerIngestF()
     'copies UTI to USI in CORE templates
     usiCheck (idColumn)
     
-    If endIt = True Then
-        Exit Function
-    End If
+    If endIt = True Then Exit Function
     
     Application.ScreenUpdating = True
     Columns.AutoFit
@@ -71,46 +62,53 @@ Function spillOverCheck()
 'this function prevents a possible error of creating extra UTI ID's
 'due to hidden characters in an excel spreadsheet that cannot be deleted.
 
-    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) = 0 Then
+    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 1 Then
         spillOverCheck = True
     End If
-   
+    
+
 End Function
 Function getAssClass(currentRow)
  'creating Asset Class portion of the UTI / Trade ID
-On Error GoTo handleErrorAsset
-    
-    Set ThisCell = ActiveCell       'remembering active cell
-    find ("primary asset class")
+ 
+    Set ThisCell = ActiveCell       'setting start position
+    findAssetClass
     pacColumn = ActiveCell.Column
     ThisCell.Select                 'returning to active cell after getting the PAC column
-   
     
-    'AssetClass abbreviations:
+    'AssetClass  for Harmonized, CORE and EU Lite abbreviations:
     If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Then
         getAssClass = "FX_"
-    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "InterestRate" Then
+    
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "CU" Then
+        getAssClass = "CU_"
+    
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "InterestRate" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "IR" Then
         getAssClass = "IR_"
-    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Commodity" Then
+    
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Commodity" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "CO" Then
         getAssClass = "CO_"
-    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Equity" Then
+    
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Equity" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "EQ" Then
         getAssClass = "EQ_"
-    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Credit" Then
+    
+    ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Credit" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "CR" Then
         getAssClass = "CR_"
+    
     Else
         getAssClass = "??_"
     End If
-    Exit Function
-    
-handleErrorAsset:
-    MsgBox "No 'Primary Asset Class' field was found", vbInformation, "WARNING!"
-    endIt = True
-    Exit Function
+
     
 End Function
 
 Function formatTradeId(count As Integer, currentRow) As String
-
+    
+    If endIt = True Then Exit Function
     Dim harn As String
     Dim counter As String
     Dim newFour As Integer
@@ -248,16 +246,23 @@ Function getTradeIdPrefix()
 End Function
 
 Function tradeIdDate()
-    Dim moveIt As Integer
+  '  Dim moveIt As Integer
     tradeid = ActiveCell.Value                          'Save the value to the variable tradeId
     datePortion = Mid(tradeid, 16, 8)                   'Extract the Date from trade Id
     tradeIdDate = datePortion                           'Saves date as string to function
 End Function
 
 Function getLastFour()
+
+On Error GoTo changeFormat:
     tradeid = ActiveCell.Value              'Save the value to the variable tradeId
-    counter = Right(tradeid, 4)             'Extract the last three digits
+    counter = Right(tradeid, 4)             'Extract the last four digits
     getLastFour = CInt(counter)             'Convert string to integer and save
+    Exit Function
+    
+changeFormat:
+    getLastFour = "0000"
+    
 End Function
 
 Function headerCount() As Integer
