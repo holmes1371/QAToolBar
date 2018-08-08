@@ -1,0 +1,40 @@
+Dim IE As Object
+Dim gtrUrl As String
+
+Declare Function apiShowWindow Lib "user32" Alias "ShowWindow" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
+Global Const SW_SHOWNORMAL = 1
+Global Const SW_SHOWMINIMIZED = 2
+Global Const SW_MAXIMIZE = 3
+
+
+Sub PullReports(control As IRibbonControl)
+    Set IE = CreateObject("InternetExplorer.Application")
+    gtrUrl = <URL GOES HERE>
+    
+    With IE
+        .Toolbar = False
+        .MenuBar = False
+        .Visible = False
+        .Navigate gtrUrl
+    End With
+
+    While IE.readyState <> 4 Or IE.Busy: DoEvents: Wend
+    apiShowWindow IE.hwnd, SW_MAXIMIZE
+    IE.Visible = True
+    
+    Dim roleObj As Object
+
+    Do
+        Set roleObj = Nothing
+        On Error Resume Next
+        Set roleObj = IE.document.getElementById("signonWorkflowValue")
+        On Error GoTo 0
+        DoEvents
+    Loop While roleObj Is Nothing
+    
+    roleObj.Options(3).Selected = True
+    IE.document.Forms(0).Submit
+    
+    Set IE = Nothing
+End Sub
+
