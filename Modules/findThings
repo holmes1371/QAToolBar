@@ -2,6 +2,26 @@ Public searchPosition
 Public foundOne
 Public usiActive
 
+Public Function findAssetClass()
+   
+   foundOne = False
+    
+    findIt ("Primary Asset Class")
+    findIt ("Asset Class")
+            
+   If foundOne = False Then
+        MsgBox "Could not find Asset Class field", vbInformation, "WARNING!"
+        Application.ScreenUpdating = True
+        Cells(1, 1).Select
+        endIt = True
+    resetSearchParameters
+  
+       Exit Function
+   End If
+    
+    Cells(searchPosition.Row, searchPosition.Column).Select
+ 
+End Function
 
 Public Sub findID()
 
@@ -9,9 +29,10 @@ foundOne = False
     
     findIt ("UTI")
     findIt ("UTI ID")
+    findIt ("Trade ID")
         
    If foundOne = False Then
-        MsgBox "Could not find UTI ID/UTI field", vbInformation, "WARNING!"
+        MsgBox "Could not find UTI ID/UTI or Trade ID field", vbInformation, "WARNING!"
         Application.ScreenUpdating = True
         Cells(1, 1).Select
         
@@ -30,7 +51,7 @@ usiActive = False
 On Error GoTo handler
         Cells.find(What:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
-        True, SearchFormat:=False).Activate
+        False, SearchFormat:=False).Activate
         
         Set searchPosition = ActiveCell
         foundOne = True
@@ -53,7 +74,7 @@ On Error GoTo handler
 
         Cells.find(What:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
-        True, SearchFormat:=False).Activate
+        False, SearchFormat:=False).Activate
         
         Set searchPosition = ActiveCell
         findUSI = searchPosition.Column
@@ -65,12 +86,20 @@ handler:
 
 End Function
 
+
 Public Function find(this)
 
+On Error GoTo niceExit:
+        
         Cells.find(What:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
+
+
+
+niceExit:
+    Exit Function
+
         
 End Function
-
 
