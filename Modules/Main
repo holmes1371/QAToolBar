@@ -11,7 +11,6 @@ Sub ApplyAllFormatting(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
     resetSearchParameters
     'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
-    
 End Sub
 
 Sub autoHeaderIngest(control As IRibbonControl)
@@ -43,10 +42,12 @@ Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
 End Sub
 
 Sub findTradeID(control As IRibbonControl)
-    
+   
+    trimmer
     findID
     If foundOne = True Then
         Application.ScreenUpdating = True
+        Cells(searchPosition.Row, searchPosition.Column).Select
         Columns.AutoFit
     End If
     resetSearchParameters
