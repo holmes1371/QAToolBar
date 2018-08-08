@@ -13,7 +13,7 @@ Public Function autoHeader2()
     foundIt = False
     count = 0
     startCell = ActiveCell.Address
-    
+    trimmer
     'checks to see if the sheet is already formatted
     If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
         Range("A2").Value = "*Comment"
@@ -82,6 +82,9 @@ Public Function autoHeader2()
         endIt = True
         Exit Function
     End If
+    
+    Range(startCell).Select
+    
 End Function
 
 
