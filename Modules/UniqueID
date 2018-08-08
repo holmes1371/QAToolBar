@@ -4,57 +4,46 @@ Public mylastcell
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
-       
-    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
-   
+    
     SheetFixIngestF
+    Application.ScreenUpdating = False 'set to false after debug
+    
+    If precheck = False Then Exit Function  'precheck for required fields.
+    
+    Set startcell = ActiveCell
+    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     abortIt = False
     endIt = False
-    Application.ScreenUpdating = False 'set to false after debug
       
     Dim i As Integer
     Dim rCount As Integer
       
-    findAssetClass
+    'exitCheck
+    'findAssetClass
     findTradeIdField
-    
-    If endIt = True Then Exit Function
-    
     rCount = getRCount
-       
-    findTradeIdField
     
-    idColumn = ActiveCell.Column
-     
+    
     'sets the new tradeID
-  
     For i = 1 To numOfTrades
             ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
             rCount = getLastFour
             ActiveCell.Offset(1, 0).Select
             
             If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
-            
-            If endIt = True Then Exit Function
     Next i
 
     'does exit trade check.
     exitCheck
     'copies UTI to USI in CORE templates
-    usiCheck (idColumn)
+    usiCheck
     
-    If endIt = True Then Exit Function
-    
+    'brings the active cell to the bottom of the TradeID column and autoFit's all columns
+    findTradeIdField
+    Selection.End(xlDown).Select
     Application.ScreenUpdating = True
     Columns.AutoFit
-    
-    'brings the active cell to the bottom of the TradeID column
-    Cells(1, idColumn).Select
-    Selection.End(xlDown).Select
     ActiveCell.Offset(1, 0).Select
-
-    Exit Function
-    
    
 End Function
 Function spillOverCheck()
@@ -124,9 +113,15 @@ Function formatTradeId(count As Integer, currentRow) As String
 End Function
 
 
-Function usiCheck(idColumn)
+Function usiCheck()
+    
+    Set ThisCell = ActiveCell       'setting start position
+    findTradeIdField
+    idColumn = ActiveCell.Column
+    ThisCell.Select                 'returning to active cell after getting the PAC column
 
     findIt ("USI Value")
+    
     If usiActive = True Then
             ActiveCell.Offset(1, 0).Select
             Set searchPosition = ActiveCell
@@ -143,7 +138,6 @@ End Function
 
 Function exitCheck()
 
-        Dim idColumn As Integer
         findTradeIdField
         idColumn = ActiveCell.Column
        
@@ -151,7 +145,10 @@ Function exitCheck()
         
 On Error GoTo handleErrorAction
         
-        find ("action")
+        Cells.find(What:="action", After:=ActiveCell, _
+        LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
+        SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
+        
         actioncolumn = ActiveCell.Column
         headerRow = ActiveCell.Row
         ActiveCell.Offset(1, 0).Select
@@ -196,6 +193,7 @@ handleErrorAction:
      ReplaceFormat:=False
      endIt = True
      Exit Function
+     
 
 End Function
 
@@ -213,7 +211,7 @@ End Function
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
-    
+    Set returncell = ActiveCell
     For i = 1 To numOfTrades
         If ActiveCell.Value <> Empty Then
             currCount = getLastFour
@@ -228,6 +226,7 @@ Function getRCount()
         End If
     Next i
     getRCount = runningCounter
+    returncell.Activate
 End Function
 
 Function todaysDate() As String
