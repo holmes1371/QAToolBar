@@ -6,6 +6,7 @@ Public Function SheetFixIngestF()
     
     startCell = ActiveCell.Address
      Application.ScreenUpdating = False
+     trimmer
     'Selects the cell on the first row and first column
     Range("A1").Select
     Selection.NumberFormat = "yyyy-mm-dd;@"
@@ -52,3 +53,5 @@ Public Function SheetFixIngestF()
     Range(startCell).Select
     
 End Function
+
+
