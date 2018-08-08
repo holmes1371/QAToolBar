@@ -77,6 +77,14 @@
                              onChange="OthValue_onChange"
                     />
                 </group>
+                <group id="reports" label="Reports">
+                    <button id="pullRptsBtn"
+                            imageMso="AccessReportMore"
+                            size="large"
+                            label="Pull Reports (GlobalQ)"
+                            onAction="pullReports"
+                    />
+                </group>
             </tab> 
         </tabs> 
     </ribbon> 
