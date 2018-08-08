@@ -86,7 +86,6 @@ handler:
 
 End Function
 
-
 Public Function find(this)
 
 On Error GoTo niceExit:
@@ -94,12 +93,52 @@ On Error GoTo niceExit:
         Cells.find(What:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
-
-
-
-niceExit:
-    Exit Function
-
+        find = True
+        foundOne = True
+        Exit Function
         
+niceExit:
+    find = False
+    Exit Function
+      
+End Function
+
+Public Function precheck()
+
+precheck = True
+Dim message As String
+displayMessage = False
+    
+   message = "Could not find: " & vbCrLf
+    
+    If find("UTI") = False And find("UTI ID") = False And find("Trade ID") = False Then
+        message = message & "UTI/Trade ID" & vbCrLf
+        displayMessage = True
+    End If
+    
+   'If find("UTI ID") = False Then message = message & "UTI ID" & vbCrLf
+   'If find("Trade ID") = False Then message = message & "Trade ID" & vbCrLf
+   
+    If find("action") = False Then
+        message = message & "Action" & vbCrLf
+        displayMessage = True
+    End If
+    
+    If find("asset class") = False And find("primary asset class") = False Then
+        message = message & "Asset Class" & vbCrLf
+        displayMessage = True
+    End If
+  
+  'If find("primary asset class") = False Then message = message & "Primary Asset Class" & vbCrLf
+
+   If displayMessage = True Then
+        MsgBox message, vbInformation, "WARNING!"
+        Application.ScreenUpdating = True
+        Cells(1, 1).Select
+        precheck = False
+        resetSearchParameters
+       Exit Function
+    End If
+    
 End Function
 
