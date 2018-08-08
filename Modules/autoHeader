@@ -5,6 +5,7 @@ Public Function autoHeader2()
 ' Developed by Tom Holmes tholmes@dtcc.com
 ' Emotional counselor: Frank
 
+    startcell = ActiveCell.Address
     Application.ScreenUpdating = False
     Dim commentLocation
     Dim foundIt
@@ -12,7 +13,6 @@ Public Function autoHeader2()
     
     foundIt = False
     count = 0
-    startCell = ActiveCell.Address
     trimmer
     'checks to see if the sheet is already formatted
     If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
@@ -73,7 +73,7 @@ Public Function autoHeader2()
             ActiveCell.Value = i
         Next i
         
-        Range(startCell).Select
+        Range(startcell).Select
     Else
         Range("A1").Select
         MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", vbInformation, "WARNING!"
@@ -83,7 +83,7 @@ Public Function autoHeader2()
         Exit Function
     End If
     
-    Range(startCell).Select
+    Range(startcell).Select
     
 End Function
 
