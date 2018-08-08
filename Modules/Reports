@@ -7,49 +7,70 @@ Global Const SW_SHOWNORMAL = 1
 Global Const SW_SHOWMINIMIZED = 2
 Global Const SW_MAXIMIZE = 3
 
-
 Sub PullReports(control As IRibbonControl)
+    'IE Object
     Set IE = CreateObject("InternetExplorer.Application")
-    optElem = "signonWorkflowValue"
+    
+    'GTR URL
     gtrUrl = "https://gtr.globalq.dtcc.com/dsr-nl-qaf-cl/sdr/action/DSSignon"
     
+    'Set IE properties
     With IE
         .Toolbar = False
         .MenuBar = False
         .Visible = False
         .Navigate gtrUrl
     End With
-
+    
+    'Wait until page finishes loading
     While IE.readyState <> 4 Or IE.Busy: DoEvents: Wend
+    
+    'Maximize IE window
     apiShowWindow IE.hwnd, SW_MAXIMIZE
+    
+    'Make IE window visible
     IE.Visible = True
+    
+    'Values corresponding to target objects
+    optElem = "signonWorkflowValue"
+    
 
-    Call webDriver("opt", IE, 3, optElem)
-    Call webDriver("opt", IE, 1, optElem)
-    Call webDriver("txt", IE, "AIXDEALER4", optElem)
-    Call webDriver("opt", IE, 3, optElem)
-            
+    'Web Driver(operation, IE object, input value, target object)
+    '   operation   opt: options
+    '               txt: text value
+    '               clk: button/link click
+    '   IE object   Set IE = CreateObject("InternetExplorer.Application")
+    '   input value (String)
+    '   target value (element Id in page)
+    
+    Call webDriver("opt", IE, 3, optElem)               'Super User
+    Call webDriver("opt", IE, 1, optElem)               'Participant
+    Call webDriver("txt", IE, "AIXDEALER4", optElem)    'Participant ID
+    Call webDriver("opt", IE, 3, optElem)               'O-Code
+    
+    'Clear IE object
     Set IE = Nothing
 End Sub
 
 Sub webDriver(oper, ieObj, val, elem)
     Dim obj As Object
     
-    While ieObj.readyState <> 4 Or IE.Busy: DoEvents: Wend
+    While ieObj.readyState <> 4 Or ieObj.Busy: DoEvents: Wend
     
+checkElem:
     Do
         Set obj = Nothing
         On Error Resume Next
         If oper = "opt" Then
             Set obj = ieObj.document.getElementById(elem).Options(val)
-            On Error GoTo 0
             DoEvents
             obj.Selected = True
+            On Error GoTo checkElem
         ElseIf oper = "txt" Then
             Set obj = ieObj.document.getElementsByName(elem)(0)
-            On Error GoTo 0
             DoEvents
             obj.Value = val
+            On Error GoTo checkElem
         End If
 
     Loop While obj Is Nothing
