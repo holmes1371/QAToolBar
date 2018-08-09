@@ -1,10 +1,14 @@
 Option Compare Text
 Public mylastcell
+Public gtxString As String
+Public Sub gtxValue_onChange(control As IRibbonControl, text As String)
+    gtxString = text
+End Sub
 
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros
 ' May 12, 2018
-    
+
     SheetFixIngestF
     Application.ScreenUpdating = False 'set to false after debug
     
@@ -18,11 +22,8 @@ Public Function autoHeaderUniquinizerIngestF()
     Dim i As Integer
     Dim rCount As Integer
       
-    'exitCheck
-    'findAssetClass
     findTradeIdField
     rCount = getRCount
-    
     
     'sets the new tradeID
     For i = 1 To numOfTrades
@@ -102,16 +103,21 @@ Function formatTradeId(count As Integer, currentRow) As String
     Dim counter As String
     Dim newFour As Integer
     Dim dt As String
-
+    
     harn = "HARNESS_AUTO_"
     dt = todaysDate
-    newFour = count + 1                                              'Adds 1 to the current count
-    counter = Format(newFour, "0000")                                'Formats counter to 4 digits
-    tradeid = harn & getAssClass(currentRow) & dt & "_" & counter    'Concatenates new tradeId
+    newFour = count + 1                                                                   'Adds 1 to the current count
+    counter = Format(newFour, "0000")
+  
+    If gtxString = Empty Then
+        tradeid = harn & getAssClass(currentRow) & dt & "_" & counter                     'Concatenates new tradeId
+    Else                                                                                  'Formats counter to 4 digits
+        tradeid = harn & getAssClass(currentRow) & gtxString & "_" & dt & "_" & counter   'Concatenates new tradeId
+    End If
+    
     formatTradeId = tradeid
     
 End Function
-
 
 Function usiCheck()
     
