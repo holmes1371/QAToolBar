@@ -1,14 +1,8 @@
 <customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui"> 
     <ribbon startFromScratch="false"> 
-        <tabs> 
+        <tabs>
             <tab id="CustomTab" label="QA Toolbar"> 
                 <group id="Formatting" label="Formatting"> 
-                    <button id="ApplyAllFormatting"
-                            imageMso="AutoFormat"
-                            size="large"
-                            label="Apply All Formatting"
-                            onAction="ApplyAllFormatting"
-                    />
                     <button id="autoHeaderIngest"
                             imageMso="ControlPropertyWidthValue"
                             size="large"
@@ -27,10 +21,17 @@
                             label="Format Header and Content"
                             onAction="autoHeaderFormatterIngest"
                     />
+                    <separator id="separator1" />
+                    <editBox id="gtxValue"
+                             label="GTX-"
+                             sizeString="0000000"
+                             maxLength="4"
+                             onChange="gtxValue_onChange"
+                    />
                     <button id="autoHeaderUniquinizerIngest"
                             imageMso="ControlPropertyDefaultValue"
-                            size="large"
-                            label="Unique Trade IDs"
+                            size="normal"
+                            label="New UTIs"
                             onAction="autoHeaderUniquinizerIngest"
                     />
                 </group>
@@ -47,7 +48,7 @@
                             label="New/Exit Split"
                             onAction="neSplit"
                     />
-                    <separator id="separator" />
+                    <separator id="separator2" />
                     <button id="textToCol"
                             imageMso="ConvertTextToTable"
                             size="large"
@@ -78,10 +79,16 @@
                     />
                 </group>
                 <group id="reports" label="Reports">
+                    <editBox id="batchValue"
+                             label="Batch:"
+                             sizeString="00000000"
+                             maxLength="6"
+                             onChange="batchValue"
+                    />
                     <button id="pullRptsBtn"
                             imageMso="AccessReportMore"
-                            size="large"
-                            label="Pull Reports (GlobalQ)"
+                            size="normal"
+                            label="Pull Reports"
                             onAction="pullReports"
                     />
                 </group>
