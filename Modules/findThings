@@ -1,3 +1,4 @@
+Option Compare Text
 Public searchPosition
 Public foundOne
 Public usiActive
@@ -26,7 +27,8 @@ End Function
 Public Sub findID()
 
 foundOne = False
-    
+Columns.AutoFit
+
     findIt ("UTI")
     findIt ("UTI ID")
     findIt ("Trade ID")
@@ -104,23 +106,35 @@ niceExit:
 End Function
 
 Public Function precheck()
-
+foundComment = False
 precheck = True
 Dim message As String
 displayMessage = False
-    
+Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
+
    message = "Could not find: " & vbCrLf
     
     If find("UTI") = False And find("UTI ID") = False And find("Trade ID") = False Then
         message = message & "UTI/Trade ID" & vbCrLf
         displayMessage = True
     End If
-    
-   'If find("UTI ID") = False Then message = message & "UTI ID" & vbCrLf
-   'If find("Trade ID") = False Then message = message & "Trade ID" & vbCrLf
    
     If find("action") = False Then
         message = message & "Action" & vbCrLf
+        displayMessage = True
+    End If
+    
+    Range("A1").Select
+    For i = 1 To mylastcell.Row
+        If ActiveCell.Value = "*comment" Then
+            foundComment = True
+            Exit For
+        End If
+        ActiveCell.Offset(1, 0).Select
+    Next i
+
+    If foundComment = False Then
+        message = message & "*Comment" & vbCrLf
         displayMessage = True
     End If
     
@@ -128,8 +142,6 @@ displayMessage = False
         message = message & "Asset Class" & vbCrLf
         displayMessage = True
     End If
-  
-  'If find("primary asset class") = False Then message = message & "Primary Asset Class" & vbCrLf
 
    If displayMessage = True Then
         MsgBox message, vbInformation, "WARNING!"
