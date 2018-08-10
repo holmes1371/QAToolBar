@@ -6,7 +6,7 @@ Public Function SheetFixIngestF()
     
     startcell = ActiveCell.Address
     Application.ScreenUpdating = False
-    trimmer (2)
+    trimmer (1)
 
     'makeBland 'removes any coloring or special formatting to the text
 
