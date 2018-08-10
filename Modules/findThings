@@ -4,8 +4,8 @@ Public foundOne
 Public usiActive
 
 Public Function findAssetClass()
-   
-   foundOne = False
+    
+    foundOne = False
     
     findIt ("Primary Asset Class")
     findIt ("Asset Class")
