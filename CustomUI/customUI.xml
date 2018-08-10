@@ -2,26 +2,32 @@
     <ribbon startFromScratch="false"> 
         <tabs>
             <tab id="CustomTab" label="QA Toolbar"> 
-                <group id="Formatting" label="Formatting"> 
+                <group id="Formatting" label="Formatting">
+                    <button id="applyAllFormatting"
+                            imageMso="AutoFormat"
+                            size="large"
+                            label="Apply All"
+                            onAction="ApplyAllFormatting"
+                    />
+                    <separator id="separator1" />
                     <button id="autoHeaderIngest"
                             imageMso="ControlPropertyWidthValue"
-                            size="large"
-                            label="Format Headers"
+                            size="normal"
+                            label="Headers"
                             onAction="autoHeaderIngest"
                     />
                     <button id="SheetFixIngest"
                             imageMso="CssReports"
-                            size="large"
-                            label="Format Content"
+                            size="normal"
+                            label="Content"
                             onAction="SheetFixIngest"
                     />
                     <button id="autoHeaderFormatterIngest"
                             imageMso="CreateWorkflow"
-                            size="large"
-                            label="Format Header and Content"
+                            size="normal"
+                            label="Table"
                             onAction="autoHeaderFormatterIngest"
                     />
-                    <separator id="separator1" />
                     <editBox id="gtxValue"
                              label="GTX-"
                              sizeString="0000000"
@@ -80,10 +86,10 @@
                 </group>
                 <group id="reports" label="Reports">
                     <editBox id="batchValue"
-                             label="Batch:"
-                             sizeString="00000000"
+                             label="Batch #:"
+                             sizeString="0000000"
                              maxLength="6"
-                             onChange="batchValue"
+                             onChange="batchVal_onChange"
                     />
                     <button id="pullRptsBtn"
                             imageMso="AccessReportMore"
@@ -95,4 +101,4 @@
             </tab> 
         </tabs> 
     </ribbon> 
-</customUI> 
+</customUI>
