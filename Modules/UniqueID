@@ -6,10 +6,8 @@ Public Sub gtxValue_onChange(control As IRibbonControl, text As String)
 End Sub
 
 Public Function autoHeaderUniquinizerIngestF()
-' Developed by Delfino Ballesteros
-' May 12, 2018
+' Developed by Delfino Ballesteros and Tom Holmes
 
-    SheetFixIngestF
     Application.ScreenUpdating = False 'set to false after debug
     
     If precheck = False Then Exit Function  'precheck for required fields.
@@ -27,11 +25,10 @@ Public Function autoHeaderUniquinizerIngestF()
     
     'sets the new tradeID
     For i = 1 To numOfTrades
-            ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
-            rCount = getLastFour
-            ActiveCell.Offset(1, 0).Select
-            
-            If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
+        ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
+        rCount = getLastFour
+        ActiveCell.Offset(1, 0).Select
+        If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
     Next i
 
     'does exit trade check.
@@ -52,7 +49,7 @@ Function spillOverCheck()
 'this function prevents a possible error of creating extra UTI ID's
 'due to hidden characters in an excel spreadsheet that cannot be deleted.
 
-    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 1 Then
+    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 4 Then
         spillOverCheck = True
     End If
     
@@ -88,9 +85,9 @@ Function getAssClass(currentRow)
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Credit" Or _
         Trim(Cells(currentRow, pacColumn).Value) = "CR" Then
         getAssClass = "CR_"
-    
+        
     Else
-        getAssClass = "??_"
+        getAssClass = "??_"  'Asset Class not provided or recognized
     End If
 
     
@@ -108,13 +105,7 @@ Function formatTradeId(count As Integer, currentRow) As String
     dt = todaysDate
     newFour = count + 1                                                                   'Adds 1 to the current count
     counter = Format(newFour, "0000")
-  
-    If gtxString = Empty Then
-        tradeid = harn & getAssClass(currentRow) & dt & "_" & counter                     'Concatenates new tradeId
-    Else                                                                                  'Formats counter to 4 digits
-        tradeid = harn & getAssClass(currentRow) & gtxString & "_" & dt & "_" & counter   'Concatenates new tradeId
-    End If
-    
+    tradeid = harn & getAssClass(currentRow) & getGTX & dt & "_" & counter
     formatTradeId = tradeid
     
 End Function
@@ -213,7 +204,15 @@ Public Function findTradeIdField()
     End If
         
 End Function
-
+Function getGTX()
+    
+    If gtxString = Empty Then
+        getGTX = ""
+    Else
+        getGTX = gtxString & "_"
+    End If
+    
+End Function
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
