@@ -13,7 +13,6 @@ Public Function autoHeader2()
     
     foundIt = False
     count = 0
-    'trimmer
     'checks to see if the sheet is already formatted
     If (Range("A1").Value = "*1") And (Range("A2").Value = "*comment") Then
         Range("A2").Value = "*Comment"
@@ -40,7 +39,7 @@ Public Function autoHeader2()
         Range("A1").Select
         Exit Function
     End If
-    
+    trimmer (2)
     Range("A1").Select
     
     For i = 1 To mylastcell.Row
