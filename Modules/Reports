@@ -1,13 +1,22 @@
-Dim IE      As Object
-Dim gtrUrl  As String
-Dim optElem As String
+Option Explicit
 
 Declare Function apiShowWindow Lib "user32" Alias "ShowWindow" (ByVal hwnd As Long, ByVal nCmdShow As Long) As Long
+
 Global Const SW_SHOWNORMAL = 1
 Global Const SW_SHOWMINIMIZED = 2
 Global Const SW_MAXIMIZE = 3
 
-Sub PullReports(control As IRibbonControl)
+Public batchStr As String
+
+Dim IE       As Object
+Dim gtrUrl   As String
+Dim optElem  As String
+
+Sub batchVal_onChange(control As IRibbonControl, text As String)
+    batchStr = text
+End Sub
+
+Sub pullReports(control As IRibbonControl)
     'IE Object
     Set IE = CreateObject("InternetExplorer.Application")
     
@@ -24,33 +33,41 @@ Sub PullReports(control As IRibbonControl)
     
     'Wait until page finishes loading
     While IE.readyState <> 4 Or IE.Busy: DoEvents: Wend
-    
-    'Maximize IE window
-    apiShowWindow IE.hwnd, SW_MAXIMIZE
-    
-    'Make IE window visible
-    IE.Visible = True
-    
-    'Values corresponding to target objects
-    optElem = "signonWorkflowValue"
-    
 
-    'Web Driver(operation, IE object, input value, target object)
-    '   operation   opt: options
-    '               txt: text value
-    '               clk: button/link click
-    '   IE object   Set IE = CreateObject("InternetExplorer.Application")
-    '   input value (String)
-    '   target value (element Id in page)
+    apiShowWindow IE.hwnd, SW_MAXIMIZE  'Maximize IE window
+    IE.Visible = True                   'Make IE window visible
     
-    Call webDriver("opt", IE, 3, optElem)               'Super User
-    Call webDriver("opt", IE, 1, optElem)               'Participant
-    Call webDriver("txt", IE, "AIXDEALER4", optElem)    'Participant ID
-    Call webDriver("opt", IE, 3, optElem)               'O-Code
+    Call gtrLogin(IE, "AIXDEALER4")      'Log Into GTR
+    Call clkUpload(IE)
+
     
     'Clear IE object
     Set IE = Nothing
 End Sub
+
+Sub gtrLogin(ieObj As Object, p As String)
+    'Values corresponding to target objects
+    optElem = "signonWorkflowValue"
+    
+    'Web Driver(operation, IE object, input value, target object)
+    '   operation   opt: choose from drop-down list
+    '               txt: enter string into textbox
+    '               clk: click a button or link by finding element name
+    '               btn: click a button or link by finding innerHTML value
+    '   IE object as created in Set IE...
+    '   input value (String)
+    '   target value (element Id in page)
+    
+    Call webDriver("opt", ieObj, 3, optElem) 'Super User
+    Call webDriver("opt", ieObj, 1, optElem) 'Participant
+    Call webDriver("txt", ieObj, p, optElem) 'Participant ID
+    Call webDriver("opt", ieObj, 3, optElem) 'O-Code
+End Sub
+
+Sub clkUpload(ieObj As Object)
+    Call webDriver("btn", ieObj, "Upload", "a") 'Click Upload Button
+End Sub
+
 
 Sub webDriver(oper, ieObj, val, elem)
     Dim obj As Object
@@ -71,6 +88,28 @@ checkElem:
             DoEvents
             obj.Value = val
             On Error GoTo checkElem
+        ElseIf oper = "clk" Then
+            Set obj = ieObj.document.getElementsByName(elem)(0)
+            DoEvents
+            obj.Value = val
+            On Error GoTo checkElem
+        ElseIf oper = "btn" Then
+            Dim i    As Integer
+            Dim aLgt As Integer
+            Dim lTgt As Integer
+            Dim pObj As Object
+            Set pObj = ieObj.document.getElementsByTagName(elem)
+            aLgt = pObj.Length
+            For i = 0 To (aLgt - 1)
+                If pObj(i).innerHTML = val Then
+                    lTgt = i
+                    Exit For
+                End If
+            Next i
+            Set obj = pObj(i)
+            DoEvents
+            obj.Click
+            On Error GoTo checkElem
         End If
 
     Loop While obj Is Nothing
@@ -79,4 +118,3 @@ checkElem:
     
     ieObj.document.forms(0).submit
 End Sub
-
