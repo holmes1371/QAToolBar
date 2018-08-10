@@ -14,8 +14,10 @@ If scope = "1" Then
     
         For Each cel In thisSheet.Cells
             With cel
+                If Trim(.Value) = Empty Then GoTo skipIt
                 .Value = Trim(.Value)
             End With
+skipIt:
         Next cel
 End If
     
