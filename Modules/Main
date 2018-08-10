@@ -22,13 +22,14 @@ Sub autoHeaderIngest(control As IRibbonControl)
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
+    trimmer (1)
     SheetFixIngestF
     resetSearchParameters
 End Sub
 
-
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
     autoHeader2
+    trimmer (1)
     SheetFixIngestF
     If endIt = False Then
        Exit Sub
@@ -43,7 +44,7 @@ End Sub
 
 Sub findTradeID(control As IRibbonControl)
    
-   'trimmer
+    trimmer (2)
     findID
     If foundOne = True Then
         Application.ScreenUpdating = True
