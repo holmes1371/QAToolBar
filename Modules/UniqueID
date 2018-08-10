@@ -8,7 +8,7 @@ End Sub
 Public Function autoHeaderUniquinizerIngestF()
 ' Developed by Delfino Ballesteros and Tom Holmes
 
-    Application.ScreenUpdating = False 'set to false after debug
+    Application.ScreenUpdating = False
     
     If precheck = False Then Exit Function  'precheck for required fields.
     
@@ -103,9 +103,9 @@ Function formatTradeId(count As Integer, currentRow) As String
     
     harn = "HARNESS_AUTO_"
     dt = todaysDate
-    newFour = count + 1                                                                   'Adds 1 to the current count
+    newFour = count + 1                                                      'Adds 1 to the current count
     counter = Format(newFour, "0000")
-    tradeid = harn & getAssClass(currentRow) & getGTX & dt & "_" & counter
+    tradeid = harn & getAssClass(currentRow) & getGTX & dt & "_" & counter   'builds new ID
     formatTradeId = tradeid
     
 End Function
