@@ -16,29 +16,29 @@
                             label="Headers"
                             onAction="autoHeaderIngest"
                     />
+                    <button id="autoHeaderUniquinizerIngest"
+                            imageMso="ControlPropertyDefaultValue"
+                            size="normal"
+                            label="New UTIs"
+                            onAction="autoHeaderUniquinizerIngest"
+                    />
                     <button id="SheetFixIngest"
                             imageMso="CssReports"
                             size="normal"
                             label="Content"
                             onAction="SheetFixIngest"
                     />
-                    <button id="autoHeaderFormatterIngest"
-                            imageMso="CreateWorkflow"
-                            size="normal"
-                            label="Table"
-                            onAction="autoHeaderFormatterIngest"
+                    <editBox id="ocodeVal"
+                             label="O-Code:"
+                             sizeString="000000"
+                             maxLength="4"
+                             onChange="ocodeVal_onChange"
                     />
                     <editBox id="gtxValue"
                              label="GTX-"
-                             sizeString="0000000"
+                             sizeString="000000"
                              maxLength="4"
                              onChange="gtxValue_onChange"
-                    />
-                    <button id="autoHeaderUniquinizerIngest"
-                            imageMso="ControlPropertyDefaultValue"
-                            size="normal"
-                            label="New UTIs"
-                            onAction="autoHeaderUniquinizerIngest"
                     />
                 </group>
                 <group id="Shortcuts" label="Shortcuts">
@@ -48,16 +48,10 @@
                             label="Scroll To UTI"
                             onAction="findTradeID"
                     />
-                    <button id="neSplit"
-                            imageMso="AdpDiagramArrangeTables"
-                            size="large"
-                            label="New/Exit Split"
-                            onAction="neSplit"
-                    />
                     <separator id="separator2" />
                     <button id="textToCol"
                             imageMso="ConvertTextToTable"
-                            size="large"
+                            size="normal"
                             label="Delimit Text"
                             onAction="textToCol"
                     />
@@ -84,18 +78,12 @@
                              onChange="OthValue_onChange"
                     />
                 </group>
-                <group id="reports" label="Reports">
-                    <editBox id="batchValue"
-                             label="Batch #:"
-                             sizeString="0000000"
-                             maxLength="6"
-                             onChange="batchVal_onChange"
-                    />
-                    <button id="pullRptsBtn"
-                            imageMso="AccessReportMore"
-                            size="normal"
-                            label="Pull Reports"
-                            onAction="pullReports"
+                <group id="augment" label="Augment">
+                    <button id="headerToolTipsBtn"
+                            imageMso="CalloutOptions"
+                            size="large"
+                            label="Header Tooltips"
+                            onAction="headerToolTips"
                     />
                 </group>
             </tab> 
