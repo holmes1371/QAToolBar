@@ -8,6 +8,7 @@
                             size="large"
                             label="Apply All"
                             onAction="ApplyAllFormatting"
+                            supertip="Apply header formatting, new UTIs, and corrections to table contents."
                     />
                     <separator id="separator1" />
                     <button id="autoHeaderIngest"
@@ -15,18 +16,21 @@
                             size="normal"
                             label="Headers"
                             onAction="autoHeaderIngest"
+                            supertip="If O-Code field is populated, will add O-Code and user information in header."
                     />
                     <button id="autoHeaderUniquinizerIngest"
                             imageMso="ControlPropertyDefaultValue"
                             size="normal"
                             label="New UTIs"
                             onAction="autoHeaderUniquinizerIngest"
+                            supertip="Generate new UTIs. If GTX field is populated, will incorporate into UTI field."
                     />
                     <button id="SheetFixIngest"
                             imageMso="CssReports"
                             size="normal"
                             label="Content"
                             onAction="SheetFixIngest"
+                            supertip="Format table content to correct fields formats and white space."
                     />
                     <editBox id="ocodeVal"
                              label="O-Code:"
@@ -47,6 +51,7 @@
                             size="large"
                             label="Scroll To UTI"
                             onAction="findTradeID"
+                            supertip="Automatically scrolls to UTI column."
                     />
                     <separator id="separator2" />
                     <button id="textToCol"
@@ -54,6 +59,7 @@
                             size="normal"
                             label="Delimit Text"
                             onAction="textToCol"
+                            supertip="Shortcut for Excel's text-to-column feature."
                     />
                     <checkBox id="TabCheckBox"
                               label="Tab"
@@ -84,6 +90,7 @@
                             size="large"
                             label="Header Tooltips"
                             onAction="headerToolTips"
+                            supertip="Adds field information to each column header from the relevant message specification document."
                     />
                 </group>
             </tab> 
