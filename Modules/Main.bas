@@ -7,7 +7,7 @@ Public abortIt
 
 
 Sub ApplyAllFormatting(control As IRibbonControl)
-    SheetFixIngestF
+    autoHeader2
     autoHeaderUniquinizerIngestF
     resetSearchParameters
     'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
@@ -22,14 +22,12 @@ Sub autoHeaderIngest(control As IRibbonControl)
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
-    trimmer (1)
     SheetFixIngestF
     resetSearchParameters
 End Sub
 
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
     autoHeader2
-    trimmer (1)
     SheetFixIngestF
     If endIt = False Then
        Exit Sub
@@ -44,7 +42,7 @@ End Sub
 
 Sub findTradeID(control As IRibbonControl)
    
-    trimmer (2)
+    trimmer
     findID
     If foundOne = True Then
         Application.ScreenUpdating = True
