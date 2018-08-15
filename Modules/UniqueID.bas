@@ -1,8 +1,8 @@
 Option Compare Text
 Public mylastcell
 Public gtxString As String
-Public Sub gtxValue_onChange(control As IRibbonControl, text As String)
-    gtxString = text
+Public Sub gtxValue_onChange(control As IRibbonControl, Text As String)
+    gtxString = Text
 End Sub
 
 Public Function autoHeaderUniquinizerIngestF()
@@ -55,6 +55,7 @@ Function spillOverCheck()
     
 
 End Function
+
 Function getAssClass(currentRow)
  'creating Asset Class portion of the UTI / Trade ID
  
@@ -65,29 +66,29 @@ Function getAssClass(currentRow)
     
     'AssetClass  for Harmonized, CORE and EU Lite abbreviations:
     If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Then
-        getAssClass = "FX_"
+        getAssClass = "FX"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "CU" Then
-        getAssClass = "CU_"
+        getAssClass = "CU"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "InterestRate" Or _
         Trim(Cells(currentRow, pacColumn).Value) = "IR" Then
-        getAssClass = "IR_"
+        getAssClass = "IR"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Commodity" Or _
         Trim(Cells(currentRow, pacColumn).Value) = "CO" Then
-        getAssClass = "CO_"
+        getAssClass = "CO"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Equity" Or _
         Trim(Cells(currentRow, pacColumn).Value) = "EQ" Then
-        getAssClass = "EQ_"
+        getAssClass = "EQ"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "Credit" Or _
         Trim(Cells(currentRow, pacColumn).Value) = "CR" Then
-        getAssClass = "CR_"
+        getAssClass = "CR"
         
     Else
-        getAssClass = "??_"  'Asset Class not provided or recognized
+        getAssClass = "??"  'Asset Class not provided or recognized
     End If
 
     
@@ -97,16 +98,43 @@ Function formatTradeId(count As Integer, currentRow) As String
     
     If endIt = True Then Exit Function
     Dim harn As String
+    
+    harn = "HARNESS_AUTO_"
+    tradeid = harn & getSuffix(count, currentRow)
+    formatTradeId = tradeid
+    
+End Function
+Function getTestNumber()
+    On Error GoTo notNumber
+    If Trim(Len(Cells(ActiveCell.Row, 1).Value)) = 6 Then
+        getTestNumber = Int(Cells(ActiveCell.Row, 1).Value)
+    End If
+    Exit Function
+    
+notNumber:
+    getTestNumber = ""
+
+End Function
+Function getSuffix(count, currentRow)
+    
     Dim counter As String
     Dim newFour As Integer
     Dim dt As String
     
-    harn = "HARNESS_AUTO_"
+    
     dt = todaysDate
-    newFour = count + 1                                                      'Adds 1 to the current count
+    newFour = count + 1                                                     'Adds 1 to the current count
     counter = Format(newFour, "0000")
-    tradeid = harn & getAssClass(currentRow) & getGTX & dt & "_" & counter   'builds new ID
-    formatTradeId = tradeid
+       
+    If getTestNumber = Empty Then
+        If gtxString = Empty Then
+            getSuffix = getAssClass(currentRow) & "_" & dt & "_" & counter
+        Else
+            getSuffix = gtxString & "_" & getAssClass(currentRow) & "_" & dt & "_" & counter
+        End If
+    Else
+        getSuffix = getTestNumber & "_" & getAssClass(currentRow)
+    End If
     
 End Function
 
@@ -204,15 +232,8 @@ Public Function findTradeIdField()
     End If
         
 End Function
-Function getGTX()
-    
-    If gtxString = Empty Then
-        getGTX = ""
-    Else
-        getGTX = gtxString & "_"
-    End If
-    
-End Function
+
+
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
@@ -233,7 +254,7 @@ Function getRCount()
     getRCount = runningCounter
     returncell.Activate
 End Function
-
+ 
 Function todaysDate() As String
     Dim dt As Date
     Dim tdate As String
@@ -291,3 +312,5 @@ Function numOfTrades() As Integer
     numOfTrades = mylastcell.Row - headerCount
     Debug.Print numOfTrades
 End Function
+
+
