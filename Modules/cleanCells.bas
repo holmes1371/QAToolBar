@@ -1,8 +1,6 @@
-
 Public Function trimmer()
-
-Application.ScreenUpdating = False
-Set startcell = ActiveCell
+    Application.ScreenUpdating = False
+    Set startcell = ActiveCell
 
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     Dim thisSheet As Range
@@ -11,14 +9,12 @@ Set startcell = ActiveCell
     Dim cel As Range
     
         For Each cel In thisSheet.Cells
+            On Error GoTo skipIt
             With cel
                 If Trim(.Value) = Empty Then GoTo skipIt
                 .Value = Trim(.Value)
             End With
 skipIt:
         Next cel
-
-
-    
 End Function
 
