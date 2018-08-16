@@ -62,7 +62,7 @@ End Sub
 
 Public Function resetSearchParameters() 'run this function at the end of each "Main" sub
     'Reset match case and entire contents
-    Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+    Cells.Replace what:="", Replacement:="", LookAt:=xlPart, _
     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
     ReplaceFormat:=False
 End Function
