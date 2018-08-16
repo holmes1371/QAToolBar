@@ -1,37 +1,167 @@
+Public headerRow
+Public lastRecord
+Option Compare Text
+
 Sub neSplit()
 
-uniqueAss = getUniqueAssets
+Application.ScreenUpdating = False
+
+startSheet = ActiveSheet.Name
+uniqueAss = getUnique("asset")
 
 For i = LBound(uniqueAss) To UBound(uniqueAss)
     Debug.Print uniqueAss(i)
 Next i
+
+tempSheet = "working11sheet4393"
+newSheet = "new12421"
+exitSheet = "22exit2983"
+
+For i = 1 To UBound(uniqueAss)
+    If uniqueAss(i) = "" Then Exit For
+    createTempSheet (tempSheet)
+    For j = headerRow + 1 To getLastRecord
+        If Cells(j, getAssClassCol).Value = uniqueAss(i) Then
+        Rows(j).Copy
+        Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValues
+        End If
+    Next j
+    Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).Value = getTrailer
+    Sheets(tempSheet).Activate
+    uniqueAction = getUnique("action")
+    
+    If getActionLength(uniqueAction) = 1 Then 'if only 1 action type, new file is created
+        fileName = getNamePart(uniqueAction(1), uniqueAss(i))
+        Call makeNewBook(fileName, tempSheet)
+        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
+    Else
+   
+    Call createNewExit(headerRow, newSheet, exitSheet)
+    
+        For k = headerRow + 1 To getLastRecord
+            If Cells(k, getActionCol).Value = "new" Then
+                Rows(k).Copy
+                Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValues
+            End If
+            If Cells(k, getActionCol).Value = "exit" Then
+                Rows(k).Copy
+                Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValues
+            End If
+        Next k
         
+        Sheets(newSheet).Range("A" & getPasteRow(newSheet)).Value = getTrailer
+        Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).Value = getTrailer
         
+        exitFileName = getNamePart("EXIT", uniqueAss(i))
+        newFileName = getNamePart("NEW", uniqueAss(i))
+        
+        Call makeNewBook(newFileName, newSheet)
+        Call makeNewBook(exitFileName, exitSheet)
+        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
+      End If
+
+Next i
+Application.ScreenUpdating = True
+Application.CutCopyMode = False
+     resetSearchParameters
 End Sub
+Function getPasteRow(sheetName)
+    startSheet = ActiveSheet.Name
+    Sheets(sheetName).Activate
+    Range("A1").Activate
+    
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    
+    getPasteRow = ActiveCell.Row
+    
+    Sheets(startSheet).Activate
 
-Function getUniqueAssets()
+End Function
+Function getNamePart(ActionType, AssetClass)
+    
+    thispath = ActiveWorkbook.Path & "\"
+    testName = getUnique("*comment")
+    testLength = UBound(testName) - LBound(testName) - 2
+    If testLength = 1 Then
+        testNumber = testName(1)
+    Else
+        testNumber = "MTC"
+    End If
+    
+    getNamePart = thispath & testNumber & "_INPUT_" & assAbbr(AssetClass) & "_ESMA_" & UCase(ActionType)
+    'Debug.Print getNamePart
+    
+End Function
+Function getActionLength(uniqueAction)
+    getActionLength = UBound(uniqueAction) - LBound(uniqueAction) - 1
+End Function
+Function assAbbr(AssetClass)
+
+    If AssetClass = "ForeignExchange" Or AssetClass = "FX" Then
+        assAbbr = "FX"
+    
+    ElseIf AssetClass = "CU" Then
+        assAbbr = "CU"
+    
+    ElseIf AssetClass = "InterestRate" Or AssetClass = "IR" Then
+        assAbbr = "IR"
+    
+    ElseIf AssetClass = "Commodity" Or AssetClass = "CO" Then
+        assAbbr = "CO"
+    
+    ElseIf AssetClass = "Equity" Or AssetClass = "EQ" Then
+        assAbbr = "EQ"
+    
+    ElseIf AssetClass = "Credit" Or AssetClass = "CR" Then
+        assAbbr = "CR"
+        
+    Else
+        assAbbr = ""  'Asset Class not provided or recognized
+    End If
+    
+End Function
+Function makeNewBook(fileName, sheetName)
+'
+Worksheets(sheetName).Copy
+
+    With ActiveWorkbook
+         .SaveAs fileName:=fileName, FileFormat:=xlCSV
+        .Close SaveChanges:=False
+    End With
+
+End Function
+
+Function getTrailer()
+    getTrailer = Left(Cells(1, 1), 5) & "-END"
+End Function
+Function getUnique(x)
 Dim assets() As String, size As Integer, i As Integer
+Cells(1, 1).Activate
+If x = "asset" Then
+    findAssetClass
+Else
+    find (x)
+End If
 
-findAssetClass
 headerRow = ActiveCell.Row
-assClassCol = ActiveCell.Column
-
-
+thisCol = ActiveCell.Column
 
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(1, 0).Activate
     Wend
 
     size = ActiveCell.Row - headerRow - 1
-    lastRecord = ActiveCell.Row - 1
+    uniqueLast = ActiveCell.Row - 1
     
 'Debug.Print lastRecord
 'Debug.Print size
 
 ReDim assets(size)
 assPosition = 1
-For i = headerRow + 1 To lastRecord
-    assets(assPosition) = Cells(i, assClassCol).Value
+For i = headerRow + 1 To uniqueLast
+    assets(assPosition) = Cells(i, thisCol).Value
     assPosition = assPosition + 1
 Next i
 
@@ -65,22 +195,71 @@ For i = LBound(uniqueAssets) To UBound(uniqueAssets)
     Next j
 Next i
         
-getUniqueAssets = uniqueAssets
+getUnique = uniqueAssets
+
+End Function
+Function deleteTheSheets(tempSheet, newSheet, exitSheet)
+
+On Error GoTo niceExit
+    Application.DisplayAlerts = False
+    Sheets(tempSheet).Delete
+    Sheets(newSheet).Delete
+    Sheets(exitSheet).Delete
+    Application.DisplayAlerts = True
+
+niceExit:
+
+End Function
+Function createTempSheet(tempSheet)
+    startSheet = ActiveSheet.Name
+    Worksheets.Add
+    ActiveSheet.Name = tempSheet
+    Sheets(startSheet).Activate
+    Rows("1:" & headerRow).Copy
+    Sheets(tempSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(startSheet).Activate
+End Function
+
+Function createNewExit(headerRow, newSheet, exitSheet)
+    startSheet = ActiveSheet.Name
+    Worksheets.Add
+    ActiveSheet.Name = newSheet
+    Worksheets.Add
+    ActiveSheet.Name = exitSheet
+    Sheets(startSheet).Activate
+    Rows("1:" & headerRow).Copy
+    Sheets(newSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Rows("1:" & headerRow).Copy
+    Sheets(exitSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+End Function
+
+Function getAssClassCol()
+Set startcell = ActiveCell
+findAssetClass
+getAssClassCol = ActiveCell.Column
+Debug.Print getAssClassCol
+startcell.Activate
 
 End Function
 
+Function getActionCol()
+Set startcell = ActiveCell
+find ("action")
+getActionCol = ActiveCell.Column
+Debug.Print getActionCol
+startcell.Activate
+End Function
 
-Function addNewBook()
-
-thispath = ActiveWorkbook.Path & "\"
-thisname = "TestBook"
-
-Set NewBook = Workbooks.Add
-    With NewBook
-        .Title = "All Sales" 'You can modify this value.
-        .Subject = "Sales" 'You can modify this value.
-        .SaveAs Filename:=thispath & thisname & ".csv"
-    End With
-
+Function getLastRecord()
+    Set startcell = ActiveCell
+    find ("action")
+    
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    
+    getLastRecord = ActiveCell.Row - 1
+    startcell.Activate
+    Debug.Print getLastRecord
 
 End Function
