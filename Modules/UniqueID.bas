@@ -24,7 +24,7 @@ Public Function autoHeaderUniquinizerIngestF()
     rCount = getRCount
     
     'sets the new tradeID
-    For i = 1 To numOfTrades
+    For i = 0 To numOfTrades
         ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
         rCount = getLastFour
         ActiveCell.Offset(1, 0).Select
@@ -38,10 +38,12 @@ Public Function autoHeaderUniquinizerIngestF()
     
     'brings the active cell to the bottom of the TradeID column and autoFit's all columns
     findTradeIdField
-    Selection.End(xlDown).Select
     Application.ScreenUpdating = True
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(1, 0).Activate
+    Wend
     Columns.AutoFit
-    ActiveCell.Offset(1, 0).Select
+  
    
 End Function
 Function spillOverCheck()
@@ -49,7 +51,7 @@ Function spillOverCheck()
 'this function prevents a possible error of creating extra UTI ID's
 'due to hidden characters in an excel spreadsheet that cannot be deleted.
 
-    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 4 Then
+    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 3 Then
         spillOverCheck = True
     End If
     
@@ -121,7 +123,6 @@ Function getSuffix(count, currentRow)
     Dim newFour As Integer
     Dim dt As String
     
-    
     dt = todaysDate
     newFour = count + 1                                                     'Adds 1 to the current count
     counter = Format(newFour, "0000")
@@ -142,21 +143,20 @@ Function usiCheck()
     
     Set ThisCell = ActiveCell       'setting start position
     findTradeIdField
-    idColumn = ActiveCell.Column
+    idcolumn = ActiveCell.Column
     ThisCell.Select                 'returning to active cell after getting the PAC column
 
     findIt ("USI Value")
     
     If usiActive = True Then
-            ActiveCell.Offset(1, 0).Select
-            Set searchPosition = ActiveCell
-            thisRow = ActiveCell.Row
-            Cells(thisRow, idColumn).Select
-            Range(Selection, Selection.End(xlDown)).Select
-            Selection.Copy
-            Cells(searchPosition.Row, searchPosition.Column).Select
-            ActiveSheet.Paste
-            Application.CutCopyMode = False
+        ActiveCell.Offset(1, 0).Select
+        Set searchPosition = ActiveCell
+        thisRow = ActiveCell.Row
+        Range(Cells(thisRow, idcolumn), Cells(lastRow, idcolumn)).Select
+        Selection.Copy
+        searchPosition.Select
+        ActiveSheet.Paste
+        Application.CutCopyMode = False
     End If
     
 End Function
@@ -164,7 +164,7 @@ End Function
 Function exitCheck()
 
         findTradeIdField
-        idColumn = ActiveCell.Column
+        idcolumn = ActiveCell.Column
        
         Range("A1").Select
         
@@ -196,9 +196,9 @@ On Error GoTo handleErrorAction
  
                 If ActiveCell.Value = tradeName And Trim(Cells(ActiveCell.Row, actioncolumn).Value) = _
                  "new" Then
-                    ActiveCell.Offset(0, idColumn - 1).Select
+                    ActiveCell.Offset(0, idcolumn - 1).Select
                     tradeid = ActiveCell.Value
-                    Cells(exitTradeRow, idColumn).Value = tradeid
+                    Cells(exitTradeRow, idcolumn).Value = tradeid
                 End If
             
                 Cells(exitTradeRow, actioncolumn).Select
@@ -223,7 +223,7 @@ handleErrorAction:
 End Function
 
 Public Function findTradeIdField()
-
+    Cells(1, 1).Activate
     findID
     If foundOne = True Then
         ActiveCell.Offset(1, 0).Select
@@ -233,12 +233,11 @@ Public Function findTradeIdField()
         
 End Function
 
-
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
     Set returncell = ActiveCell
-    For i = 1 To numOfTrades
+    For i = 0 To numOfTrades
         If ActiveCell.Value <> Empty Then
             currCount = getLastFour
             If currCount > runningCounter Then
@@ -264,19 +263,6 @@ Function todaysDate() As String
     todaysDate = tdate                      'Saves converted date string to function return
 End Function
 
-Function getTradeIdPrefix()
-    tradeid = ActiveCell.Value              'Save the value to the variable tradeId
-    Prefix = Left(tradeid, 13)              'Extract the prefix from trade Id
-    getTradeIdPrefix = Prefix               'Returns the prefix string value as function value
-End Function
-
-Function tradeIdDate()
-  '  Dim moveIt As Integer
-    tradeid = ActiveCell.Value                          'Save the value to the variable tradeId
-    datePortion = Mid(tradeid, 16, 8)                   'Extract the Date from trade Id
-    tradeIdDate = datePortion                           'Saves date as string to function
-End Function
-
 Function getLastFour()
 
 On Error GoTo changeFormat:
@@ -294,23 +280,24 @@ Function headerCount() As Integer
     'Determines the number of header columns by counting the first 5 rows containing
     'an asterisk(*) in column 1.
     headerCount = Application.WorksheetFunction.CountIf(Range("A1:A5"), "~**")
-    Debug.Print headerCount
 End Function
 
-Function totalNumRows() As Integer
-    'Determines the total number of populated rows that are filled in by referencing
-    'column B since this column will always be filled out for every applicalbe trade.
-    With ActiveSheet
-    totalNumRows = .Cells(.Rows.count, "B").End(xlUp).Row
-    End With
-    Debug.Print totalNumRows
-End Function
 
 Function numOfTrades() As Integer
     'Returns the actual number of trades by subtracting the header rows from the
     'total rows and returning the difference
-    numOfTrades = mylastcell.Row - headerCount
-    Debug.Print numOfTrades
+    numOfTrades = lastRow - 1 - headerCount
+    'MsgBox numOfTrades
+End Function
+Function lastRow()
+   Set returncell = ActiveCell
+    find ("Action")
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    lastRow = ActiveCell.Row
+    returncell.Activate
+    'MsgBox lastRow
 End Function
 
 
