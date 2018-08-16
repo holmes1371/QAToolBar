@@ -51,7 +51,7 @@ Public Function findIt(findThis)
 usiActive = False
 
 On Error GoTo handler
-        Cells.find(What:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        Cells.find(what:=findThis, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
         
@@ -72,7 +72,7 @@ Private Function findUSI()
 
 On Error GoTo handler
 
-        Cells.find(What:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        Cells.find(what:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
         
@@ -89,8 +89,8 @@ End Function
 Public Function find(this)
 
 On Error GoTo niceExit:
-        
-        Cells.find(What:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
+        Cells(1, 1).Activate
+        Cells.find(what:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
         find = True
