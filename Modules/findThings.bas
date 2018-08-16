@@ -64,10 +64,8 @@ On Error GoTo handler
         End If
         
         Exit Function
-        
 handler:
     Exit Function
-
 End Function
 
 Private Function findUSI()
