@@ -1,7 +1,7 @@
 Option Compare Text
 Public oCode As String
-Public Sub ocodeVal_onChange(control As IRibbonControl, text As String)
-    oCode = text
+Public Sub ocodeVal_onChange(control As IRibbonControl, Text As String)
+    oCode = Text
 End Sub
 
 Public Function autoHeader2()
@@ -76,27 +76,20 @@ Public Function autoHeader2()
             If ActiveCell.Value Like "*-END" And ActiveCell.Offset(1, 0).Value = Empty Then GoTo bailOut
         Wend
 
+
 bailOut:
         ActiveCell.Value = "*" & getOcode & "-END"
-        
-         
-'        For i = 2 To mylastcell.Column
-'            ActiveCell.Offset(0, 1).Select
-'            ActiveCell.Value = i
-'        Next i
         
         Range(startcell).Select
     Else
         Range("A1").Select
-        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
-        Range("A1").Select
+        MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", _
+        vbInformation, "WARNING!"
         endIt = True
-        Exit Function
     End If
+    Application.ScreenUpdating = True
+    Range("A1").Select
     SheetFixIngestF
-    Range(startcell).Select
-    
 End Function
 
 Function bigFishDate() As String
@@ -114,8 +107,6 @@ Function getOcode()
     Else
         getOcode = "XXXX"
     End If
-        
-
 End Function
 
 
