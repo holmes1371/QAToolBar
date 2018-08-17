@@ -23,7 +23,7 @@ Public Function SheetFixIngestF()
     Application.ReplaceFormat.NumberFormat = "yyyy-mm-dd;@"
 
     'Find and replace date formatting based on above defined formatting
-    Cells.Replace What:="", Replacement:="", LookAt:=xlWhole, SearchOrder:= _
+    Cells.Replace what:="", Replacement:="", LookAt:=xlWhole, SearchOrder:= _
     xlByRows, SearchFormat:=True, ReplaceFormat:=True
 
     'Clear formatting
@@ -31,17 +31,17 @@ Public Function SheetFixIngestF()
     Application.ReplaceFormat.Clear
 
     'Finds and replaces case for TRUE boolean values
-    Cells.Replace What:="TRUE", Replacement:="'true", LookAt:=xlWhole, _
+    Cells.Replace what:="TRUE", Replacement:="'true", LookAt:=xlWhole, _
     SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
     ReplaceFormat:=False
     
     'Finds and replaces case for FALSE boolean values
-    Cells.Replace What:="FALSE", Replacement:="'false", LookAt:=xlWhole, _
+    Cells.Replace what:="FALSE", Replacement:="'false", LookAt:=xlWhole, _
     SearchOrder:=xlByRows, MatchCase:=True, SearchFormat:=False, _
     ReplaceFormat:=False
     
     'Reset match case and entire contents
-    Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+    Cells.Replace what:="", Replacement:="", LookAt:=xlPart, _
     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
     ReplaceFormat:=False
     

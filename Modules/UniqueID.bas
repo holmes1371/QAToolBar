@@ -67,7 +67,8 @@ Function getAssClass(currentRow)
     ThisCell.Select                 'returning to active cell after getting the PAC column
     
     'AssetClass  for Harmonized, CORE and EU Lite abbreviations:
-    If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Then
+    If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "FX" Then
         getAssClass = "FX"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "CU" Then
@@ -170,7 +171,7 @@ Function exitCheck()
         
 On Error GoTo handleErrorAction
         
-        Cells.find(What:="action", After:=ActiveCell, _
+        Cells.find(what:="action", After:=ActiveCell, _
         LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
         SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
         
@@ -184,12 +185,12 @@ On Error GoTo handleErrorAction
                 tradeName = Cells(exitTradeRow, 1).Value
                 Columns("A:A").Select
 
-                Selection.find(What:=tradeName, After:=ActiveCell, _
+                Selection.find(what:=tradeName, After:=ActiveCell, _
                 LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                 SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
                 
                 If ActiveCell.Row = exitTradeRow Then
-                    Selection.find(What:=tradeName, After:=ActiveCell, _
+                    Selection.find(what:=tradeName, After:=ActiveCell, _
                     LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                     SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
                 End If
@@ -213,7 +214,7 @@ On Error GoTo handleErrorAction
 handleErrorAction:
      MsgBox "No 'Action' field was found", vbInformation, "WARNING!"
     'Reset match case and entire contents
-     Cells.Replace What:="", Replacement:="", LookAt:=xlPart, _
+     Cells.Replace what:="", Replacement:="", LookAt:=xlPart, _
      SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
      ReplaceFormat:=False
      endIt = True
