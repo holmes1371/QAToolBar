@@ -1,11 +1,10 @@
 Public headerRow
-Public lastRecord
 Option Compare Text
 
-Sub neSplit()
-
+Sub bigFishPrep(control As IRibbonControl)
+workingMessage
+autoHeaderUniquinizerIngestF
 Application.ScreenUpdating = False
-
 startSheet = ActiveSheet.Name
 uniqueAss = getUnique("asset")
 
@@ -13,9 +12,10 @@ For i = LBound(uniqueAss) To UBound(uniqueAss)
     Debug.Print uniqueAss(i)
 Next i
 
-tempSheet = "working11sheet4393"
-newSheet = "new12421"
-exitSheet = "22exit2983"
+'create random names for sheets
+tempSheet = "working" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
+newSheet = "new" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
+exitSheet = "exit" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
 
 For i = 1 To UBound(uniqueAss)
     If uniqueAss(i) = "" Then Exit For
@@ -23,7 +23,9 @@ For i = 1 To UBound(uniqueAss)
     For j = headerRow + 1 To getLastRecord
         If Cells(j, getAssClassCol).Value = uniqueAss(i) Then
         Rows(j).Copy
-        Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValues
+        Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
+        Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
         End If
     Next j
     Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).Value = getTrailer
@@ -31,8 +33,7 @@ For i = 1 To UBound(uniqueAss)
     uniqueAction = getUnique("action")
     
     If getActionLength(uniqueAction) = 1 Then 'if only 1 action type, new file is created
-        fileName = getNamePart(uniqueAction(1), uniqueAss(i))
-        Call makeNewBook(fileName, tempSheet)
+        Call makeNewBook(uniqueAction(1), uniqueAss(i), tempSheet)
         Call deleteTheSheets(tempSheet, newSheet, exitSheet)
     Else
    
@@ -41,30 +42,51 @@ For i = 1 To UBound(uniqueAss)
         For k = headerRow + 1 To getLastRecord
             If Cells(k, getActionCol).Value = "new" Then
                 Rows(k).Copy
-                Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValues
+                Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
             End If
             If Cells(k, getActionCol).Value = "exit" Then
                 Rows(k).Copy
-                Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValues
+                Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
             End If
         Next k
         
         Sheets(newSheet).Range("A" & getPasteRow(newSheet)).Value = getTrailer
         Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).Value = getTrailer
         
-        exitFileName = getNamePart("EXIT", uniqueAss(i))
-        newFileName = getNamePart("NEW", uniqueAss(i))
-        
-        Call makeNewBook(newFileName, newSheet)
-        Call makeNewBook(exitFileName, exitSheet)
+        Call makeNewBook("NEW", uniqueAss(i), newSheet)
+        Call makeNewBook("EXIT", uniqueAss(i), exitSheet)
         Call deleteTheSheets(tempSheet, newSheet, exitSheet)
       End If
 
 Next i
-Application.ScreenUpdating = True
-Application.CutCopyMode = False
+
+    Unload Working
+    refreshScreen
      resetSearchParameters
+    MsgBox "Files have been successfully created", vbInformation, "Complete"
+    retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
+    refreshScreen
+    Cells(1, 1).Activate
 End Sub
+Function workingMessage()
+    
+    With Working
+        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
+        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
+        .Show vbModeless
+        .Repaint
+    End With
+    
+End Function
+
+Function getpath()
+
+    getpath = ActiveWorkbook.Path & "\"
+    Debug.Print getpath
+
+End Function
 Function getPasteRow(sheetName)
     startSheet = ActiveSheet.Name
     Sheets(sheetName).Activate
@@ -79,9 +101,12 @@ Function getPasteRow(sheetName)
     Sheets(startSheet).Activate
 
 End Function
-Function getNamePart(ActionType, AssetClass)
-    
+Function getNamePart(ActionType, AssetClass, sheetName)
+
     thispath = ActiveWorkbook.Path & "\"
+    Debug.Print thispath
+    startSheet = ActiveSheet.Name
+    Sheets(sheetName).Activate
     testName = getUnique("*comment")
     testLength = UBound(testName) - LBound(testName) - 2
     If testLength = 1 Then
@@ -92,7 +117,21 @@ Function getNamePart(ActionType, AssetClass)
     
     getNamePart = thispath & testNumber & "_INPUT_" & assAbbr(AssetClass) & "_ESMA_" & UCase(ActionType)
     'Debug.Print getNamePart
+    Sheets(startSheet).Activate
     
+End Function
+Function makeNewBook(ActionType, AssetClass, sheetName)
+'
+    fileName = getNamePart(ActionType, AssetClass, sheetName)
+
+    Worksheets(sheetName).Copy
+    
+    With ActiveWorkbook
+        .SaveAs fileName:=fileName, FileFormat:=xlCSV
+         SheetFixIngestF
+        .Close SaveChanges:=True
+    End With
+
 End Function
 Function getActionLength(uniqueAction)
     getActionLength = UBound(uniqueAction) - LBound(uniqueAction) - 1
@@ -121,16 +160,6 @@ Function assAbbr(AssetClass)
         assAbbr = ""  'Asset Class not provided or recognized
     End If
     
-End Function
-Function makeNewBook(fileName, sheetName)
-'
-Worksheets(sheetName).Copy
-
-    With ActiveWorkbook
-         .SaveAs fileName:=fileName, FileFormat:=xlCSV
-        .Close SaveChanges:=False
-    End With
-
 End Function
 
 Function getTrailer()
@@ -216,7 +245,8 @@ Function createTempSheet(tempSheet)
     ActiveSheet.Name = tempSheet
     Sheets(startSheet).Activate
     Rows("1:" & headerRow).Copy
-    Sheets(tempSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(tempSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
     Sheets(startSheet).Activate
 End Function
 
@@ -228,9 +258,11 @@ Function createNewExit(headerRow, newSheet, exitSheet)
     ActiveSheet.Name = exitSheet
     Sheets(startSheet).Activate
     Rows("1:" & headerRow).Copy
-    Sheets(newSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(newSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
     Rows("1:" & headerRow).Copy
-    Sheets(exitSheet).Range("A1").PasteSpecial Paste:=xlPasteValues
+    Sheets(exitSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
 End Function
 
 Function getAssClassCol()
