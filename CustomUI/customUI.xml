@@ -1,4 +1,4 @@
-<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui"> 
+<customUI xmlns="http://schemas.microsoft.com/office/2006/01/customui" onLoad="OnRibbonLoad"> 
     <ribbon startFromScratch="false"> 
         <tabs>
             <tab id="CustomTab" label="QA Toolbar"> 
@@ -37,12 +37,13 @@
                              sizeString="000000"
                              maxLength="4"
                              onChange="ocodeVal_onChange"
+                             getText="clearBox"
                     />
                     <editBox id="gtxValue"
                              label="GTX-"
                              sizeString="000000"
-                             maxLength="4"
                              onChange="gtxValue_onChange"
+                             getText="clearBox"
                     />
                 </group>
                 <group id="Shortcuts" label="Shortcuts">
@@ -52,6 +53,13 @@
                             label="Scroll To UTI"
                             onAction="findTradeID"
                             supertip="Automatically scrolls to UTI column."
+                    />
+                    <button id="bigFishPrepBtn"
+                            imageMso="CreateDiagram"
+                            size="large"
+                            label="Prepare for BigFish"
+                            onAction="bigFishPrep"
+                            supertip="Splits transactions by Action and Asset Type into individual files."
                     />
                     <separator id="separator2" />
                     <button id="textToCol"
@@ -69,7 +77,7 @@
                               label="Semicolon"
                               onAction="boxChecked"
                     />
-                    <checkBox id="CmmCheckBox" 
+                    <checkBox id="CmmCheckBox"
                               label="Comma"
                               onAction="boxChecked"
                     />
@@ -91,6 +99,15 @@
                             label="Header Tooltips"
                             onAction="headerToolTips"
                             supertip="Adds field information to each column header from the relevant message specification document."
+                    />
+                </group>
+                <group id="csvToFpml" label="FPML Tools">
+                    <button id="csvToFpmlBtn"
+                            imageMso="ConvertTableToText"
+                            size="large"
+                            label="CSV To FPML"
+                            onAction="csvToFpml"
+                            supertip="Converts transactions in a Harmonized CSV file into individual FPML files."
                     />
                 </group>
             </tab> 
