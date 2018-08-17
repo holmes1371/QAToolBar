@@ -129,6 +129,7 @@ Function makeNewBook(ActionType, AssetClass, sheetName)
     With ActiveWorkbook
         .SaveAs fileName:=fileName, FileFormat:=xlCSV
          SheetFixIngestF
+         Application.ScreenUpdating = False
         .Close SaveChanges:=True
     End With
 
