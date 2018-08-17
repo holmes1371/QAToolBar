@@ -65,7 +65,7 @@ Public Function autoHeader2()
         Rows("1:1").Select
         Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
         
-        bigFishHeader = "*" & getOcode & bigFishDate & Environ$("Username") & "@dtcc.com"
+        bigFishHeader = "*" & getOcode & bigFishDate & "O" & Environ$("Username") & "@dtcc.com"
         
         Cells(1, 1).Value = bigFishHeader
         
