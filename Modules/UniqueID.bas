@@ -67,7 +67,8 @@ Function getAssClass(currentRow)
     ThisCell.Select                 'returning to active cell after getting the PAC column
     
     'AssetClass  for Harmonized, CORE and EU Lite abbreviations:
-    If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Then
+    If Trim(Cells(currentRow, pacColumn).Value) = "ForeignExchange" Or _
+        Trim(Cells(currentRow, pacColumn).Value) = "FX" Then
         getAssClass = "FX"
     
     ElseIf Trim(Cells(currentRow, pacColumn).Value) = "CU" Then
