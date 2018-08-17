@@ -42,7 +42,6 @@
                     <editBox id="gtxValue"
                              label="GTX-"
                              sizeString="000000"
-                             maxLength="4"
                              onChange="gtxValue_onChange"
                              getText="clearBox"
                     />
