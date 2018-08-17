@@ -1,4 +1,4 @@
-'QA Toolbar, v. 1.3
+'QA Toolbar, v. 1.3.4
 'Dtd: 08/15/2018
 
 Option Compare Text
@@ -20,7 +20,7 @@ End Sub
 Sub ApplyAllFormatting(control As IRibbonControl)
     autoHeader2
     autoHeaderUniquinizerIngestF
-    resetSearchParameters
+    finalReset
     'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
 End Sub
 
@@ -29,12 +29,13 @@ Sub autoHeaderIngest(control As IRibbonControl)
     If endIt = False Then
         Exit Sub
     End If
-    resetSearchParameters
+    finalReset
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
     SheetFixIngestF
     resetSearchParameters
+    finalReset
 End Sub
 
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
@@ -47,7 +48,7 @@ End Sub
 
 Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
-    resetSearchParameters
+    finalReset
 End Sub
 
 Sub findTradeID(control As IRibbonControl)
@@ -57,12 +58,19 @@ Sub findTradeID(control As IRibbonControl)
         Application.ScreenUpdating = True
         Cells(searchPosition.Row, searchPosition.Column).Select
     End If
-    resetSearchParameters
+    finalReset
 End Sub
-
+Public Function finalReset()
+    resetSearchParameters
+    refreshScreen
+End Function
 Public Function resetSearchParameters() 'run this function at the end of each "Main" sub
     'Reset match case and entire contents
     Cells.Replace what:="", Replacement:="", LookAt:=xlPart, _
     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
     ReplaceFormat:=False
+End Function
+Public Function refreshScreen()
+Application.ScreenUpdating = True
+Application.CutCopyMode = False
 End Function
