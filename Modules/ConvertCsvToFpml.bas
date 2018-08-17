@@ -8,39 +8,52 @@ Sub csvToFpml(control As IRibbonControl)
 End Sub
 
 Sub parseFields(taxFilePath, fpmlFldPath)
-    Dim taxTable As String
-    Dim taxArray() As String
-    Dim taxElem As Variant
-    Dim taxLine As String
+    Dim i As Integer
+    Dim j As Integer
+    Dim taxArr() As Variant
+    Dim taxLen   As Integer
+    Dim taxText  As String
     
-    taxArray = readFile(taxFilePath)
-    
-    For Each taxElem In taxArray
+    taxArr = readFile(taxFilePath)
+    taxLen = UBound(taxArr)
         
-    Next taxElem
+    For i = 0 To taxLen
+        taxText = taxText & Join(taxArr(i), ",") & vbNewLine
+    Next i
     
-    For Each taxElem In taxArray
-        taxTable = taxTable & taxElem & vbNewLine
-    Next str
-        
-    MsgBox taxTable
+    MsgBox taxText
 End Sub
 
 'Function for a reading file
 Function readFile(filePath)
-    Dim objFSO As Object
-    Dim objTF  As Object
-    Dim objStr As String
-    Dim objArr() As String
+    Dim FSO       As Object
+    Dim OTF       As Object
+    Dim fileStr   As String
+    Dim fileArr() As String
+    Dim fileLen   As Integer
+    Dim fileIdx   As Integer
+    Dim outArr()  As Variant
     
-    Set objFSO = CreateObject("Scripting.FileSystemObject")
-    Set objTF = objFSO.OpenTextFile(filePath, 1)
-    objStr = objTF.readall
-    objArr = Split(objStr, vbNewLine)
-    objTF.Close
+    'Reads file path and loads file into an array
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Set OTF = FSO.OpenTextFile(filePath, 1)
+    fileStr = OTF.readall
+    fileArr = Split(fileStr, vbNewLine)
+    OTF.Close
     
-    'Returns an array with each new file line
-    readFile = objArr
+    'Determines the length of the array (ie. # of lines in file)
+    fileLen = UBound(fileArr)
+    
+    'Reclassifies array in order to fit fileArr
+    ReDim outArr(fileLen) As Variant
+    
+    'Loops through to enter CSV into two-dimensional array
+    For fileIdx = 0 To fileLen
+        outArr(fileIdx) = Split(fileArr(fileIdx), ",")
+    Next fileIdx
+    
+    'Returns two-dimensional array
+    readFile = outArr
 End Function
 
 'Invokes file or folder picker, depending on string passed.
@@ -73,5 +86,5 @@ Function selectFile(name As String) As String
     End With
     
     'Returns path selected as a string
-    loadPicker = selItems
+    selectFile = selItems
 End Function
