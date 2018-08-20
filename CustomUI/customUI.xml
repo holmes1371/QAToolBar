@@ -25,20 +25,26 @@
                              getText="clearBox"
                     />
                     <editBox id="gtxValue"
-                             label="GTX-"
-                             sizeString="000000"
-                             maxLength="4"
+                             label="JIRA #:"
+                             sizeString="0000000000"
                              onChange="gtxValue_onChange"
                              getText="clearBox"
                     />
                 </group>
-                <group id="Manual" label="Manual">
+                <group id="Manual" label="New UTIs">
                     <button id="autoHeaderUniquinizerIngest"
                             imageMso="ControlPropertyDefaultValue"
                             size="large"
-                            label="New UTIs"
-                            onAction="autoHeaderUniquinizerIngest"
-                            supertip="Generate new UTIs. If GTX field is populated, will incorporate into UTI field."
+                            label="Manual"
+                            onAction="manualNewUti"
+                            supertip="Generate new UTIs. If there is a six-digit number in the Comments column, will add to the UTI field. Will override JIRA # field."
+                    />
+                    <button id="autoHeaderUniquinizerIngest"
+                            imageMso="ControlPropertyDefaultValue"
+                            size="large"
+                            label="Automated"
+                            onAction="autoNewUti"
+                            supertip="Generate new UTIs. If there is a six-digit number in the Comments column, will add to the UTI field. Will override JIRA # field."
                     />
                 </group>
                 <group id="Auto" label="Automated">
