@@ -3,31 +3,16 @@
         <tabs>
             <tab id="CustomTab" label="QA Toolbar"> 
                 <group id="Formatting" label="Formatting">
-                    <button id="applyAllFormatting"
-                            imageMso="AutoFormat"
-                            size="large"
-                            label="Apply All"
-                            onAction="ApplyAllFormatting"
-                            supertip="Apply header formatting, new UTIs, and corrections to table contents."
-                    />
-                    <separator id="separator1" />
                     <button id="autoHeaderIngest"
                             imageMso="ControlPropertyWidthValue"
-                            size="normal"
+                            size="large"
                             label="Headers"
                             onAction="autoHeaderIngest"
                             supertip="If O-Code field is populated, will add O-Code and user information in header."
                     />
-                    <button id="autoHeaderUniquinizerIngest"
-                            imageMso="ControlPropertyDefaultValue"
-                            size="normal"
-                            label="New UTIs"
-                            onAction="autoHeaderUniquinizerIngest"
-                            supertip="Generate new UTIs. If GTX field is populated, will incorporate into UTI field."
-                    />
                     <button id="SheetFixIngest"
                             imageMso="CssReports"
-                            size="normal"
+                            size="large"
                             label="Content"
                             onAction="SheetFixIngest"
                             supertip="Format table content to correct fields formats and white space."
@@ -42,8 +27,27 @@
                     <editBox id="gtxValue"
                              label="GTX-"
                              sizeString="000000"
+                             maxLength="4"
                              onChange="gtxValue_onChange"
                              getText="clearBox"
+                    />
+                </group>
+                <group id="Manual" label="Manual">
+                    <button id="autoHeaderUniquinizerIngest"
+                            imageMso="ControlPropertyDefaultValue"
+                            size="large"
+                            label="New UTIs"
+                            onAction="autoHeaderUniquinizerIngest"
+                            supertip="Generate new UTIs. If GTX field is populated, will incorporate into UTI field."
+                    />
+                </group>
+                <group id="Auto" label="Automated">
+                    <button id="bigFishPrepBtn"
+                            imageMso="CreateDiagram"
+                            size="large"
+                            label="Prepare for BigFish"
+                            onAction="bigFishPrep"
+                            supertip="Splits transactions by Action and Asset Type into individual files."
                     />
                 </group>
                 <group id="Shortcuts" label="Shortcuts">
@@ -54,14 +58,6 @@
                             onAction="findTradeID"
                             supertip="Automatically scrolls to UTI column."
                     />
-                    <button id="bigFishPrepBtn"
-                            imageMso="CreateDiagram"
-                            size="large"
-                            label="Prepare for BigFish"
-                            onAction="bigFishPrep"
-                            supertip="Splits transactions by Action and Asset Type into individual files."
-                    />
-                    <separator id="separator2" />
                     <button id="textToCol"
                             imageMso="ConvertTextToTable"
                             size="normal"
