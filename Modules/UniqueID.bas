@@ -1,6 +1,8 @@
 Option Compare Text
 Public mylastcell
 Public gtxString As String
+Public utiMode As String
+
 Public Sub gtxValue_onChange(control As IRibbonControl, Text As String)
     gtxString = Text
 End Sub
@@ -10,7 +12,7 @@ Public Function autoHeaderUniquinizerIngestF()
 
     SheetFixIngestF
     Application.ScreenUpdating = False
-    
+        
     If precheck = False Then Exit Function  'precheck for required fields.
     Set startcell = ActiveCell
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
@@ -100,10 +102,8 @@ End Function
 Function formatTradeId(count As Integer, currentRow) As String
     
     If endIt = True Then Exit Function
-    Dim harn As String
-    
-    harn = "HARNESS_AUTO_"
-    tradeid = harn & getSuffix(count, currentRow)
+
+    tradeid = getSuffix(count, currentRow)
     formatTradeId = tradeid
     
 End Function
@@ -123,19 +123,33 @@ Function getSuffix(count, currentRow)
     Dim counter As String
     Dim newFour As Integer
     Dim dt As String
+    Dim harn As String
     
+    harn = "HARNESS_AUTO_"
     dt = todaysDate
     newFour = count + 1                                                     'Adds 1 to the current count
     counter = Format(newFour, "0000")
        
+    'utiMode = "auto"
+    'utiMode = "manual"
+    
     If getTestNumber = Empty Then
-        If gtxString = Empty Then
-            getSuffix = getAssClass(currentRow) & "_" & dt & "_" & counter
-        Else
-            getSuffix = gtxString & "_" & getAssClass(currentRow) & "_" & dt & "_" & counter
+        If utiMode = "auto" Then
+            If gtxString = Empty Then
+                getSuffix = harn & getAssClass(currentRow) & "_" & counter
+            Else
+                getSuffix = harn & UCase(gtxString) & "_" & getAssClass(currentRow) & "_" & counter
+            End If
+        End If
+        If utiMode = "manual" Then
+            If gtxString = Empty Then
+                getSuffix = "MANUAL_" & getAssClass(currentRow) & "_" & dt & "_" & counter
+            Else
+                getSuffix = UCase(gtxString) & "_" & dt & "_" & getAssClass(currentRow) & "_UTI" & counter
+            End If
         End If
     Else
-        getSuffix = getTestNumber & "_" & getAssClass(currentRow)
+        getSuffix = harn & getTestNumber & "_" & getAssClass(currentRow)
     End If
     
 End Function

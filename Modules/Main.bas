@@ -1,4 +1,5 @@
-'QA Toolbar, v. 1.3.4
+'QA Toolbar, v. 1.3.5
+'Developed by Tom Holmes and Frank Castillo
 'Dtd: 08/15/2018
 
 Option Compare Text
@@ -46,7 +47,13 @@ Sub autoHeaderFormatterIngest(control As IRibbonControl)
     End If
 End Sub
 
-Sub autoHeaderUniquinizerIngest(control As IRibbonControl)
+Sub manualNewUti(control As IRibbonControl)
+    utiMode = "manual"
+    autoHeaderUniquinizerIngestF
+    finalReset
+End Sub
+Sub autoNewUti(control As IRibbonControl)
+    utiMode = "auto"
     autoHeaderUniquinizerIngestF
     finalReset
 End Sub

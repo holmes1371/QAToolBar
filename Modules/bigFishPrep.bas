@@ -2,6 +2,7 @@ Public headerRow
 Option Compare Text
 
 Sub bigFishPrep(control As IRibbonControl)
+utiMode = "auto"
 workingMessage
 autoHeaderUniquinizerIngestF
 Application.ScreenUpdating = False
