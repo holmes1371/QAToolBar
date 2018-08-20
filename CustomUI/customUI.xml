@@ -32,15 +32,15 @@
                     />
                 </group>
                 <group id="Manual" label="New UTIs">
-                    <button id="autoHeaderUniquinizerIngest"
+                    <button id="manualNewUtiBtn"
                             imageMso="ControlPropertyDefaultValue"
                             size="large"
                             label="Manual"
                             onAction="manualNewUti"
                             supertip="Generate new UTIs. If there is a six-digit number in the Comments column, will add to the UTI field. Will override JIRA # field."
                     />
-                    <button id="autoHeaderUniquinizerIngest"
-                            imageMso="ControlPropertyDefaultValue"
+                    <button id="autoNewUtiBtn"
+                            imageMso="AddInCommandsMenu"
                             size="large"
                             label="Automated"
                             onAction="autoNewUti"
