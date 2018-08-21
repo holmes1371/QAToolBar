@@ -69,16 +69,12 @@ Public Function autoHeader2()
         
         Cells(1, 1).Value = bigFishHeader
         
-        Range("A1").Select
-        
+        find ("action") 'uses action column (must be populated in all templates) to find the last record
         While ActiveCell.Value <> Empty
             ActiveCell.Offset(1, 0).Activate
-            If ActiveCell.Value Like "*-END" And ActiveCell.Offset(1, 0).Value = Empty Then GoTo bailOut
         Wend
 
-
-bailOut:
-        ActiveCell.Value = "*" & getOcode & "-END"
+        Cells(ActiveCell.Row, 1).Value = "*" & getOcode & "-END"
         
         Range(startcell).Select
     Else
