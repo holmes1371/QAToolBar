@@ -44,12 +44,12 @@ For i = 1 To UBound(uniqueAss)
             If Cells(k, getActionCol).Value = "new" Then
                 Rows(k).Copy
                 Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
+                xlNone, SkipBlanks:=False, Transpose:=False
             End If
             If Cells(k, getActionCol).Value = "exit" Then
                 Rows(k).Copy
                 Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
+                xlNone, SkipBlanks:=False, Transpose:=False
             End If
         Next k
         
