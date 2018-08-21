@@ -3,19 +3,19 @@
         <tabs>
             <tab id="CustomTab" label="QA Toolbar"> 
                 <group id="Formatting" label="Formatting">
-                    <button id="autoHeaderIngest"
-                            imageMso="ControlPropertyWidthValue"
-                            size="large"
-                            label="Headers"
-                            onAction="autoHeaderIngest"
-                            supertip="If O-Code field is populated, will add O-Code and user information in header."
-                    />
                     <button id="SheetFixIngest"
                             imageMso="CssReports"
                             size="large"
                             label="Content"
                             onAction="SheetFixIngest"
                             supertip="Format table content to correct fields formats and white space."
+                    />
+                    <button id="autoHeaderIngest"
+                            imageMso="ControlPropertyWidthValue"
+                            size="large"
+                            label="Headers"
+                            onAction="autoHeaderIngest"
+                            supertip="If O-Code field is populated, will add O-Code and user information in header."
                     />
                     <editBox id="ocodeVal"
                              label="O-Code:"
