@@ -1,0 +1,132 @@
+Option Compare Text
+Public XDoc As Object, root As Object, elem As Object
+Public thisHeader
+
+'Sub headerTest()
+'thisHeader = getHeaderVals
+'headerCol = headerSearch("Submitting Party - ID")
+'
+'Debug.Print headerCol
+'
+'End Sub
+
+Sub makeXML()
+
+currentRow = 3
+csvHeader = getHeaderVals
+
+Set XDoc = CreateObject("MSXML2.DOMDocument")
+Set root = XDoc.createElement("nonpublicExecutionReport")
+XDoc.appendChild root
+
+Call addAttribute("nonpublicExecutionReport", "fpmlVersion", "5-5")
+Call addAttribute("nonpublicExecutionReport", "xmlns", "http://www.fpml.org/FpML-5/recordkeeping")
+Call addAttribute("nonpublicExecutionReport", "xmlns:dtcc", "http://www.dtcc.com/ext")
+Call addAttribute("nonpublicExecutionReport", "xmlns:ns3", "http://www.w3.org/2000/09/xmldsig#")
+
+Set thisHeader = XDoc.createElement("header")
+root.appendChild thisHeader
+
+
+Set elem = XDoc.createElement("messageId")
+thisHeader.appendChild elem
+Set messageId = XDoc.getElementsByTagName("messageId")
+messageId(0).Text = "HARN_TEST_123"
+Call addAttribute("messageId", "messageIdScheme", "http://www.credit-suisse.com/msg_id")
+
+
+x = "sentBy"
+Set elem = XDoc.createElement(x)
+thisHeader.appendChild elem
+Call addAttribute(x, "messageAddressScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
+Set thisValue = XDoc.getElementsByTagName(x)
+thisValue(0).Text = getSubmittingParty(currentRow)
+
+x = "sentTo"
+Set elem = XDoc.createElement(x)
+thisHeader.appendChild elem
+
+
+x = "creationTimestamp"
+Set elem = XDoc.createElement(x)
+thisHeader.appendChild elem
+
+
+x = "implementationSpecification"
+Set impSpec = XDoc.createElement(x)
+thisHeader.appendChild impSpec
+
+
+x = "version"
+Set elem = XDoc.createElement(x)
+impSpec.appendChild elem
+Call addAttribute(x, "implementationSpecificationVersionScheme", "http://www.dtcc.com")
+Set thisValue = XDoc.getElementsByTagName(x)
+thisValue(0).Text = "CA4.0CO1.8"
+
+
+XDoc.Save ("C:\Users\tholmes\temp dev sheets\XMLs\genesisXML.xml")
+Set XDoc = Nothing
+
+End Sub
+
+Function getSubmittingParty(currentRow)
+
+getSubmittingParty = Cells(currentRow, headerSearch("Submitting Party - ID Type")).Value
+
+
+
+End Function
+
+Function addAttribute(target, attributeName As String, attributeDescription As String)
+
+Dim rel As Object
+Set rel = XDoc.createAttribute(attributeName)
+rel.NodeValue = attributeDescription
+Set thisnode = XDoc.SelectSingleNode("//" & target)
+thisnode.setAttributeNode rel
+
+
+End Function
+Function getHeaderVals()
+
+Dim headerVal() As String, size As Integer, i As Integer
+Cells(1, 1).Activate
+
+While ActiveCell.Value <> "*comment"
+    ActiveCell.Offset(1, 0).Activate
+Wend
+headerRow = ActiveCell.Row
+
+
+While ActiveCell.Value <> Empty
+    ActiveCell.Offset(0, 1).Activate
+Wend
+
+size = ActiveCell.Column - 2
+
+ReDim headerVal(size)
+
+Cells(headerRow, 1).Activate
+
+For i = 0 To UBound(headerVal)
+    headerVal(i) = ActiveCell.Value
+    ActiveCell.Offset(0, 1).Activate
+Next i
+
+getHeaderVals = headerVal
+
+'Debug.Print headerRow
+
+End Function
+
+Function headerSearch(columnName) 'returns column number
+
+columnName = "Submitting Party - ID"
+For i = 0 To UBound(csvHeader)
+    If csvHeader(i) = columnName Then Exit For
+Next i
+
+headerSearch = i + 1
+
+End Function

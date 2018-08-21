@@ -1,6 +1,6 @@
 Public Function trimmer()
     Application.ScreenUpdating = False
-    Set startcell = ActiveCell
+    Set startCell = ActiveCell
 
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     Dim thisSheet As Range

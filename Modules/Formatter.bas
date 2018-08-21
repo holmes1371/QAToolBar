@@ -4,7 +4,7 @@ Public Function SheetFixIngestF()
 ' edited by Tom Holmes tholmes@dtcc.com
 ' Googled meaning of ";@" by Frank Castillo fcastilloandino@dtcc.com
     
-    startcell = ActiveCell.Address
+    startCell = ActiveCell.Address
     Application.ScreenUpdating = False
     trimmer
 
@@ -51,7 +51,7 @@ Public Function SheetFixIngestF()
     Application.ScreenUpdating = True
     
     Columns.AutoFit
-    Range(startcell).Select
+    Range(startCell).Select
     
 End Function
 

@@ -1,7 +1,15 @@
 Public headerRow
+Public checkBoxAction As Boolean
+Public checkBoxAsset As Boolean
 Option Compare Text
 
 Sub bigFishPrep(control As IRibbonControl)
+
+If checkBoxAsset = False And checkBoxAction = False Then
+    MsgBox "Please select 'Action Split' and/or 'Asset Split'", vbInformation, "Warning."
+    GoTo bothFalse
+End If
+
 utiMode = "auto"
 workingMessage
 autoHeaderUniquinizerIngestF
@@ -9,9 +17,7 @@ Application.ScreenUpdating = False
 startSheet = ActiveSheet.Name
 uniqueAss = getUnique("asset")
 
-For i = LBound(uniqueAss) To UBound(uniqueAss)
-    Debug.Print uniqueAss(i)
-Next i
+counter = 0
 
 'create random names for sheets
 tempSheet = "working" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
@@ -19,19 +25,49 @@ newSheet = "new" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
 exitSheet = "exit" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
 
 For i = 1 To UBound(uniqueAss)
+    If checkBoxAction = True And checkBoxAsset = False Then GoTo actionStart
     If uniqueAss(i) = "" Then Exit For
+    counter = counter + 1
     createTempSheet (tempSheet)
     For j = headerRow + 1 To getLastRecord
         If Cells(j, getAssClassCol).Value = uniqueAss(i) Then
-        Rows(j).Copy
-        Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
-        Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
+            Rows(j).Copy
+            Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
+            Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False
         End If
     Next j
     Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).Value = getTrailer
-    Sheets(tempSheet).Activate
+    Sheets(tempSheet).Activate 'sheet has been split by asset
+    
+    If checkBoxAsset = True And checkBoxAction = False Then
+        Call makeNewBook(getMessageType, uniqueAss(i), tempSheet)
+        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
+        GoTo skipAhead
+    End If
+    
+actionStart:
     uniqueAction = getUnique("action")
+    
+    If checkBoxAction = True And checkBoxAsset = False Then
+        For k = 1 To UBound(uniqueAction)
+            If uniqueAction(k) = "" Then Exit For
+            counter = counter + 1
+            createTempSheet (tempSheet)
+            For j = headerRow + 1 To getLastRecord
+                If Cells(j, getActionCol).Value = uniqueAction(k) Then
+                    Rows(j).Copy
+                    Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
+                    Operation:= _
+                    xlNone, SkipBlanks:=False, Transpose:=False
+                End If
+            Next j
+            
+            Call makeNewBook(uniqueAction(k), checkAssets(uniqueAss, tempSheet), tempSheet)
+            Call deleteTheSheets(tempSheet, newSheet, exitSheet)
+        Next k
+        GoTo finishLine
+    End If
     
     If getActionLength(uniqueAction) = 1 Then 'if only 1 action type, new file is created
         Call makeNewBook(uniqueAction(1), uniqueAss(i), tempSheet)
@@ -44,12 +80,12 @@ For i = 1 To UBound(uniqueAss)
             If Cells(k, getActionCol).Value = "new" Then
                 Rows(k).Copy
                 Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
+                xlNone, SkipBlanks:=False, Transpose:=False
             End If
             If Cells(k, getActionCol).Value = "exit" Then
                 Rows(k).Copy
                 Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
+                xlNone, SkipBlanks:=False, Transpose:=False
             End If
         Next k
         
@@ -58,19 +94,49 @@ For i = 1 To UBound(uniqueAss)
         
         Call makeNewBook("NEW", uniqueAss(i), newSheet)
         Call makeNewBook("EXIT", uniqueAss(i), exitSheet)
+        counter = counter + 1
         Call deleteTheSheets(tempSheet, newSheet, exitSheet)
       End If
+skipAhead:
 
 Next i
 
+finishLine:
     Unload Working
     refreshScreen
-     resetSearchParameters
-    MsgBox "Files have been successfully created", vbInformation, "Complete"
+    resetSearchParameters
+    MsgBox counter & " Files have been successfully created", vbInformation, "Complete"
     retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
+bothFalse:
     refreshScreen
+    If Working.Visible = True Then Unload Working
     Cells(1, 1).Activate
 End Sub
+Function checkAssets(uniqueAss, sheetName)
+    thisSheet = ActiveSheet.Name
+    Sheets(sheetName).Activate
+    theseAssets = getUnique("asset")
+    
+    If UBound(theseAssets) - LBound(theseAssets) - 1 = 1 Then
+        checkAssets = theseAssets(1)
+    Else
+        checkAssets = "XA"
+    End If
+    
+    Sheets(thisSheet).Activate
+
+End Function
+Function getMessageType()
+    Set startCell = ActiveCell
+    
+    find ("Message Type")
+    ActiveCell.Offset(1, 0).Activate
+    If ActiveCell.Value = "Trade State" Then getMessageType = "TRD"
+    If ActiveCell.Value = "Valuation" Then getMessageType = "VAL"
+    
+    startCell.Activate
+
+End Function
 Function workingMessage()
     
     With Working
@@ -157,6 +223,9 @@ Function assAbbr(AssetClass)
     
     ElseIf AssetClass = "Credit" Or AssetClass = "CR" Then
         assAbbr = "CR"
+        
+    ElseIf AssetClass = "XA" Then
+        assAbbr = "XA"
         
     Else
         assAbbr = ""  'Asset Class not provided or recognized
@@ -268,24 +337,24 @@ Function createNewExit(headerRow, newSheet, exitSheet)
 End Function
 
 Function getAssClassCol()
-Set startcell = ActiveCell
+Set startCell = ActiveCell
 findAssetClass
 getAssClassCol = ActiveCell.Column
 Debug.Print getAssClassCol
-startcell.Activate
+startCell.Activate
 
 End Function
 
 Function getActionCol()
-Set startcell = ActiveCell
+Set startCell = ActiveCell
 find ("action")
 getActionCol = ActiveCell.Column
 Debug.Print getActionCol
-startcell.Activate
+startCell.Activate
 End Function
 
 Function getLastRecord()
-    Set startcell = ActiveCell
+    Set startCell = ActiveCell
     find ("action")
     
     While ActiveCell.Value <> Empty
@@ -293,7 +362,19 @@ Function getLastRecord()
     Wend
     
     getLastRecord = ActiveCell.Row - 1
-    startcell.Activate
+    startCell.Activate
     Debug.Print getLastRecord
 
 End Function
+
+Sub chkBoxAction_onAction(control As IRibbonControl, pressed As Boolean)
+    
+        checkBoxAction = pressed
+        
+End Sub
+
+Sub chkBoxAsset_onAction(control As IRibbonControl, pressed As Boolean)
+    
+      checkBoxAsset = pressed
+    
+End Sub

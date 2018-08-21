@@ -10,7 +10,7 @@ Public Function autoHeader2()
 ' Emotional counselor: Frank
 ' formats header and trainer to be compliant with BigFish requirements
     
-    startcell = ActiveCell.Address
+    startCell = ActiveCell.Address
     Application.ScreenUpdating = False
     
     Dim commentLocation
@@ -69,18 +69,14 @@ Public Function autoHeader2()
         
         Cells(1, 1).Value = bigFishHeader
         
-        Range("A1").Select
-        
+        find ("action") 'uses action column (must be populated in all templates) to find the last record
         While ActiveCell.Value <> Empty
             ActiveCell.Offset(1, 0).Activate
-            If ActiveCell.Value Like "*-END" And ActiveCell.Offset(1, 0).Value = Empty Then GoTo bailOut
         Wend
 
-
-bailOut:
-        ActiveCell.Value = "*" & getOcode & "-END"
+        Cells(ActiveCell.Row, 1).Value = "*" & getOcode & "-END"
         
-        Range(startcell).Select
+        Range(startCell).Select
     Else
         Range("A1").Select
         MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", _

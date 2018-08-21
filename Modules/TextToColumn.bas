@@ -18,7 +18,7 @@ Public Sub textToCol(control As IRibbonControl)
     
    'Do the parse
     objRange1.TextToColumns _
-    Destination:=Range("A1"), _
+    destination:=Range("A1"), _
         DataType:=xlDelimited, _
         TextQualifier:=xlDoubleQuote, _
         ConsecutiveDelimiter:=False, _
@@ -43,13 +43,13 @@ Public Sub boxChecked(control As IRibbonControl, pressed As Boolean)
     If control.ID = "OthCheckBox" Then othBool = pressed
 End Sub
 
-Public Sub OthValue_onChange(control As IRibbonControl, text As String)
-    If (text <> "" And text <> Chr(32)) Then
+Public Sub OthValue_onChange(control As IRibbonControl, Text As String)
+    If (Text <> "" And Text <> Chr(32)) Then
         othBool = True
-        othStr = text & ", " & Asc(text)
-    ElseIf (text = "") Then
+        othStr = Text & ", " & Asc(Text)
+    ElseIf (Text = "") Then
         othBool = False
-        othStr = text
+        othStr = Text
     End If
 End Sub
 
