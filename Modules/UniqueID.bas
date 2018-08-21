@@ -129,7 +129,6 @@ Function getSuffix(count, currentRow)
     dt = todaysDate
     newFour = count + 1                                                     'Adds 1 to the current count
     counter = Format(newFour, "0000")
-       
     'utiMode = "auto"
     'utiMode = "manual"
     
@@ -138,20 +137,32 @@ Function getSuffix(count, currentRow)
             If gtxString = Empty Then
                 getSuffix = harn & getAssClass(currentRow) & "_" & counter
             Else
-                getSuffix = harn & UCase(gtxString) & "_" & getAssClass(currentRow) & "_" & counter
+                getSuffix = harn & UCase(specialStrip(gtxString)) & "_" & getAssClass(currentRow) & "_" & counter
             End If
         End If
         If utiMode = "manual" Then
             If gtxString = Empty Then
                 getSuffix = "MANUAL_" & getAssClass(currentRow) & "_" & dt & "_" & counter
             Else
-                getSuffix = UCase(gtxString) & "_" & dt & "_" & getAssClass(currentRow) & "_UTI" & counter
+                getSuffix = UCase(specialStrip(gtxString)) & "_" & dt & "_" & getAssClass(currentRow) & "_UTI" & counter
             End If
         End If
     Else
         getSuffix = harn & getTestNumber & "_" & getAssClass(currentRow)
     End If
     
+End Function
+Function specialStrip(someString)
+
+Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?,-,~"  'modify as needed
+Dim char As Variant
+tempString = someString
+For Each char In Split(SpecialCharacters, ",")
+    tempString = Replace(tempString, char, "")
+Next
+
+specialStrip = tempString
+
 End Function
 
 Function usiCheck()
@@ -302,9 +313,8 @@ Function numOfTrades() As Integer
     'Returns the actual number of trades by subtracting the header rows from the
     'total rows and returning the difference
     numOfTrades = lastRow - 1 - headerCount
-    'MsgBox numOfTrades
 End Function
-Function lastRow()
+Function lastRow() 'action is a mandatory field for all templates
    Set returncell = ActiveCell
     find ("Action")
     While ActiveCell.Value <> Empty
@@ -312,7 +322,6 @@ Function lastRow()
     Wend
     lastRow = ActiveCell.Row
     returncell.Activate
-    'MsgBox lastRow
 End Function
 
 
