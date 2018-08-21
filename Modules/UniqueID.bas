@@ -14,7 +14,7 @@ Public Function autoHeaderUniquinizerIngestF()
     Application.ScreenUpdating = False
         
     If precheck = False Then Exit Function  'precheck for required fields.
-    Set startcell = ActiveCell
+    Set startCell = ActiveCell
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     abortIt = False
     endIt = False
