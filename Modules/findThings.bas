@@ -4,7 +4,7 @@ Public foundOne
 Public usiActive
 
 Public Function findAssetClass()
-    
+    Cells(1, 1).Select
     foundOne = False
     
     findIt ("Primary Asset Class")
@@ -25,7 +25,7 @@ Public Function findAssetClass()
 End Function
 
 Public Sub findID()
-
+Cells(1, 1).Select
 foundOne = False
 Columns.AutoFit
 
@@ -47,7 +47,7 @@ Columns.AutoFit
 
 End Sub
 Public Function findIt(findThis)
-
+Cells(1, 1).Select
 usiActive = False
 
 On Error GoTo handler
@@ -71,7 +71,7 @@ End Function
 Private Function findUSI()
 
 On Error GoTo handler
-
+Cells(1, 1).Select
         Cells.find(what:="USI Value", After:=ActiveCell, LookIn:=xlFormulas, LookAt _
         :=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
         False, SearchFormat:=False).Activate
@@ -87,7 +87,7 @@ handler:
 End Function
 
 Public Function find(this)
-
+Cells(1, 1).Select
 On Error GoTo niceExit:
         Cells(1, 1).Activate
         Cells.find(what:=this, After:=ActiveCell, LookIn:=xlFormulas, LookAt _
