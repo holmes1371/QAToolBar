@@ -48,20 +48,12 @@
                     />
                 </group>
                 <group id="Auto" label="Automated">
-                    <button id="bigFishPrepBtn"
+                    <button id="splitFilesBtn"
                             imageMso="CreateDiagram"
-                            size="normal"
-                            label="BigFish Prep"
-                            onAction="bigFishPrep"
+                            size="large"
+                            label="Split Files"
+                            onAction="splitFiles"
                             supertip="Splits transactions by Action and Asset Type into individual files."
-                    />
-                    <checkBox id="chkBoxAction"
-                              label="Action Split"
-                              onAction="chkBoxAction_onAction"
-                    />
-                    <checkBox id="chkBoxAsset"
-                              label="Asset Split"
-                              onAction="chkBoxAsset_onAction"
                     />
                 </group>
                 <group id="Shortcuts" label="Shortcuts">
