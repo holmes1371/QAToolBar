@@ -1,3 +1,4 @@
+Attribute VB_Name = "SplitSelector"
 Function splitSelector(inArrs() As String) As String()
     Dim inArr As Variant
     Dim outArr() As String
@@ -6,6 +7,8 @@ Function splitSelector(inArrs() As String) As String()
         For Each inArr In inArrs
             .selectCombo.AddItem inArr
         Next inArr
+        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
+        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
         .Show
         ReDim Preserve outArr(.orderList.listCount - 1)
         For i = 0 To (.orderList.listCount - 1)
@@ -23,5 +26,5 @@ Sub splitTest()
     
     newArr = splitSelector(oldArr)
     
-    Debug.Print UBound(newArr) & ":" & Join(newArr, ",")
+    Debug.Print (UBound(newArr) + 1) & ":" & Join(newArr, ",")
 End Sub
