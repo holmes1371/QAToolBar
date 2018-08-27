@@ -65,7 +65,7 @@ Function getAssClass(currentRow)
  
     Set ThisCell = ActiveCell       'setting start position
     findAssetClass
-    pacColumn = ActiveCell.Column
+    pacColumn = ActiveCell.column
     ThisCell.Select                 'returning to active cell after getting the PAC column
     
     'AssetClass  for Harmonized, CORE and EU Lite abbreviations:
@@ -169,7 +169,7 @@ Function usiCheck()
     
     Set ThisCell = ActiveCell       'setting start position
     findTradeIdField
-    idcolumn = ActiveCell.Column
+    idcolumn = ActiveCell.column
     ThisCell.Select                 'returning to active cell after getting the PAC column
 
     findIt ("USI Value")
@@ -190,7 +190,7 @@ End Function
 Function exitCheck()
 
         findTradeIdField
-        idcolumn = ActiveCell.Column
+        idcolumn = ActiveCell.column
        
         Range("A1").Select
         
@@ -200,7 +200,7 @@ On Error GoTo handleErrorAction
         LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
         SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
         
-        actioncolumn = ActiveCell.Column
+        actioncolumn = ActiveCell.column
         headerRow = ActiveCell.Row
         ActiveCell.Offset(1, 0).Select
         
