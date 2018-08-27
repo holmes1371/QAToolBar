@@ -2,47 +2,73 @@ Public headerRow
 Public csvHeader
 Public tempSheet
 Public fileCount
+Public prepMode As Boolean
+Public newArr() As String
 Option Compare Text
 
 Sub splitFiles(control As IRibbonControl)
     
-    fileCount = 0
-    tempSheet = 0
+    setStartVals
+    
     Set startCell = ActiveCell
     utiMode = "auto"
     
     setHeaderVals
     
-    splitOptions = splitSelector(csvHeader)
+    splitOptions = SplitSelector(csvHeader)
     
+    If endIt = True Then
+        refreshScreen
+        Exit Sub
+    End If
+    
+    setHeaderVals
     autoHeaderUniquinizerIngestF
-    workingMessage
+   ' workingMessage
+    ProgressBar.Show
     
     Application.ScreenUpdating = False
     
     startsheet = ActiveSheet.Name
 
     Call splitThisSheet(ActiveSheet.Name, splitOptions)
-
+    
     verifyFinal (splitOptions)
 
-    Unload Working
-    
+
+    Unload ProgressBar
+    'Unload Working
     refreshScreen
-    
+    startCell.Activate
     resetSearchParameters
     
     If fileCount = 0 Then
         MsgBox "No files have been created", vbInformation, "Complete"
     Else
         MsgBox fileCount & " files have been successfully created", vbInformation, "Complete"
+        'open fileExplorer to the location where files are saved
+        retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
     End If
     
-    'open fileExplorer to the location where files are saved
-    retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
-    startCell.Activate
+    prepMode = False
     
 End Sub
+
+
+Function getTotalNumber()
+
+Dim totalNumber As Integer
+
+    totalNumber = 1
+
+    For k = LBound(splitOptions) To UBound(splitOptions)
+        tempUnique = getUnique(splitOptions(k))
+        totalNumber = totalNumber * (UBound(tempUnique) + 1)
+    Next k
+    
+    getTotalNumber = totalNumber
+
+End Function
 
 Function splitThisSheet(sheetName As String, criteria)
 
@@ -64,7 +90,6 @@ Sheets(sheetName).Activate
         End If
     
 skipIt:
-
     Next opt
 
 End Function
@@ -85,6 +110,13 @@ skipIt:
         If isFinished = True Then
             Call makeNewBook(criteria, CStr(i))
             fileCount = fileCount + 1
+            
+            With ProgressBar
+                .text.Caption = (fileCount / getTotalNumber) & "% Complete"
+                .Bar.Width = (fileCount / getTotalNumber) * 2
+            End With
+            DoEvents
+            
             Sheets(CStr(i)).Delete
         Else
             Sheets(CStr(i)).Delete
@@ -187,6 +219,7 @@ Function setHeaderVals()
     Dim headerVal() As String, size As Integer, i As Integer
     
     Application.ScreenUpdating = False
+    Set startCell = ActiveCell
     Cells(1, 1).Activate
     
     While ActiveCell.Value <> "*comment"
@@ -211,6 +244,8 @@ Function setHeaderVals()
     Next i
     
     csvHeader = headerVal
+    
+    startCell.Activate
     Application.ScreenUpdating = True
 
 End Function
@@ -391,7 +426,6 @@ Function getAssClassCol()
 Set startCell = ActiveCell
 findAssetClass
 getAssClassCol = ActiveCell.column
-Debug.Print getAssClassCol
 startCell.Activate
 
 End Function
@@ -400,7 +434,7 @@ Function getActionCol()
 Set startCell = ActiveCell
 find ("action")
 getActionCol = ActiveCell.column
-Debug.Print getActionCol
+
 startCell.Activate
 End Function
 
@@ -414,7 +448,7 @@ Function getLastRecord()
     
     getLastRecord = ActiveCell.Row - 1
     startCell.Activate
-    Debug.Print getLastRecord
+    
 
 End Function
 
@@ -429,21 +463,62 @@ headerSearch = i + 1
 
 End Function
 
-Function splitSelector(ByRef inArrs As Variant) As String()
+Function SplitSelector(inArrs As Variant) As Variant
     Dim inArr As Variant
     Dim outArr() As String
+    Dim sortAr() As String
     Dim i As Integer
+    
+    For i = 0 To UBound(inArrs)
+        ReDim Preserve newArr(i)
+        newArr(i) = inArrs(i)
+    Next i
+On Error GoTo hardExit
+    sortAr = sortArray(newArr)
+    
     With SplitSelectForm
-        For Each inArr In inArrs
-            .selectCombo.AddItem inArr
+        For Each inArr In sortAr
+            .optionList.AddItem inArr
         Next inArr
         .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
         .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
         .Show
-        ReDim Preserve outArr(.orderList.ListCount - 1)
-        For i = 0 To (.orderList.ListCount - 1)
-            outArr(i) = .orderList.List(i)
+        ReDim Preserve outArr(.selectedList.ListCount - 1)
+        For i = 0 To (.selectedList.ListCount - 1)
+            outArr(i) = .selectedList.List(i)
         Next i
     End With
-    splitSelector = outArr
+    SplitSelector = outArr
+    Exit Function
+    
+hardExit:
+    endIt = True
+
+End Function
+
+Function sortArray(arr As Variant) As String()
+    Dim i As Integer
+    Dim j As Integer
+    Dim tmp
+    
+    For i = LBound(arr) To UBound(arr)
+        For j = i + 1 To UBound(arr)
+            If UCase(arr(i)) > UCase(arr(j)) Then
+                tmp = arr(j)
+                arr(j) = arr(i)
+                arr(i) = tmp
+            End If
+        Next j
+    Next i
+    
+    sortArray = arr
+End Function
+
+Function setStartVals()
+    
+    endIt = False
+    prepMode = True
+    fileCount = 0
+    tempSheet = 0
+
 End Function
