@@ -1,32 +1,44 @@
 Public headerRow
 Public csvHeader
 Public tempSheet
-Public counter
+Public fileCount
 Option Compare Text
 
-Sub bigFishPrep(control As IRibbonControl)
-Set startCell = ActiveCell
-utiMode = "auto"
-workingMessage
-autoHeaderUniquinizerIngestF
-Application.ScreenUpdating = False
-startsheet = ActiveSheet.Name
-counter = 0
-tempSheet = 0
-setHeaderVals
-Dim splitOptions(2) As String
+Sub splitFiles(control As IRibbonControl)
+    
+    fileCount = 0
+    tempSheet = 0
+    Set startCell = ActiveCell
+    utiMode = "auto"
+    
+    setHeaderVals
+    
+    splitOptions = splitSelector(csvHeader)
+    
+    autoHeaderUniquinizerIngestF
+    workingMessage
+    
+    Application.ScreenUpdating = False
+    
+    startsheet = ActiveSheet.Name
 
-splitOptions(1) = "Primary Asset Class"
-splitOptions(2) = "Action"
+    Call splitThisSheet(ActiveSheet.Name, splitOptions)
 
-Call splitThisSheet(ActiveSheet.Name, splitOptions)
-
-verifyFinal (splitOptions)
+    verifyFinal (splitOptions)
 
     Unload Working
+    
     refreshScreen
+    
     resetSearchParameters
-    MsgBox counter & " Files have been successfully created", vbInformation, "Complete"
+    
+    If fileCount = 0 Then
+        MsgBox "No files have been created", vbInformation, "Complete"
+    Else
+        MsgBox fileCount & " files have been successfully created", vbInformation, "Complete"
+    End If
+    
+    'open fileExplorer to the location where files are saved
     retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
     startCell.Activate
     
@@ -37,21 +49,18 @@ Function splitThisSheet(sheetName As String, criteria)
 Sheets(sheetName).Activate
 
     For Each opt In criteria
-        If opt = "" Then
-        GoTo skipIt
-        End If
+
         tempUnique = getUnique(opt)
-        If getArrayLength(tempUnique) = 1 Then
+        
+        If UBound(tempUnique) = 0 Then
             GoTo skipIt:
         Else
-            For Each element In tempUnique
-            If element <> "" Then
+            For i = LBound(tempUnique) To UBound(tempUnique)
             tempSheet = tempSheet + 1
             createTempSheet (CStr(tempSheet))
-            Call doCopy(sheetName, CStr(tempSheet), headerSearch(opt), element)
+            Call doCopy(sheetName, CStr(tempSheet), headerSearch(opt), tempUnique(i))
             Call splitThisSheet(CStr(tempSheet), criteria)
-            End If
-            Next element
+            Next i
         End If
     
 skipIt:
@@ -65,20 +74,17 @@ Application.DisplayAlerts = False
     
         Sheets(CStr(i)).Activate
         
-        For Each elem In criteria
-            If elem = "" Then GoTo skipIt
+        For j = LBound(criteria) To UBound(criteria)
             isFinished = False
-            tempUnique = getUnique(elem)
-            If getArrayLength(tempUnique) <> 1 Then
-                Exit For
-            End If
+            tempUnique = getUnique(criteria(j))
+            If UBound(tempUnique) <> 0 Then Exit For
             isFinished = True
 skipIt:
-        Next elem
+        Next j
 
         If isFinished = True Then
             Call makeNewBook(criteria, CStr(i))
-            counter = counter + 1
+            fileCount = fileCount + 1
             Sheets(CStr(i)).Delete
         Else
             Sheets(CStr(i)).Delete
@@ -104,14 +110,14 @@ End Function
 Function getNamePart(criteria, sheetName)
 
     thispath = ActiveWorkbook.Path & "\"
-    Debug.Print thispath
     startsheet = ActiveSheet.Name
     Sheets(sheetName).Activate
     testName = getUnique("*comment")
-    testLength = UBound(testName) - 1
+    testLength = UBound(testName)
     
-    If testLength = 1 Then
-        testNumber = testName(1)
+    If testLength = 0 Then
+        If testName(0) = "" Then testName(0) = "BLANK"
+        testNumber = testName(0)
     Else
         testNumber = "MTC"
     End If
@@ -122,17 +128,30 @@ Function getNamePart(criteria, sheetName)
     
     Dim endPart As String
     
-    For i = 1 To UBound(criteria)
+    For i = 0 To UBound(criteria)
         If criteria(i) = "Asset Class" Or criteria(i) = "Primary Asset Class" Then GoTo skipIt
         appendage = getUnique(criteria(i))
-        endPart = endPart & "_" & UCase(appendage(1))
+        If appendage(0) = "" Then appendage(0) = "blank"
+        endPart = endPart & "_" & UCase(appendage(0))
 skipIt:
     Next i
     
-    getNamePart = thispath & testNumber & "_INPUT_" & assAbbr(AssetClass) & "_ESMA" & endPart
-    'Debug.Print getNamePart
+    If hasUTI(criteria) = True Then
+        getNamePart = thispath & testNumber & "_INPUT" & "_ESMA" & endPart
+    Else
+        getNamePart = thispath & testNumber & "_INPUT" & assAbbr(AssetClass) & "_ESMA" & endPart
+    End If
+    
     Sheets(startsheet).Activate
     
+End Function
+Function hasUTI(criteria) As Boolean
+
+     hasUTI = False
+     For i = LBound(criteria) To UBound(criteria)
+        If criteria(i) = "UTI" Or criteria(i) = "UTI ID" Or criteria(i) = "Trade ID" Then hasUTI = True
+    Next i
+
 End Function
 
 Function doCopy(parentSheet, targetSheet As String, icol, criteria)
@@ -140,7 +159,7 @@ Function doCopy(parentSheet, targetSheet As String, icol, criteria)
     Sheets(parentSheet).Activate
     
         For j = headerRow + 1 To getLastRecord
-            If Cells(j, icol).Value = criteria Then
+            If CStr(Cells(j, icol).Value) = criteria Then
                 Rows(j).Copy
                 Sheets(targetSheet).Range("A" & getPasteRow(targetSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
                 Operation:= _
@@ -165,99 +184,93 @@ End Function
 
 Function setHeaderVals()
 
-Dim headerVal() As String, size As Integer, i As Integer
-
-
-Cells(1, 1).Activate
-
-While ActiveCell.Value <> "*comment"
-    ActiveCell.Offset(1, 0).Activate
-Wend
-headerRow = ActiveCell.Row
-
-
-While ActiveCell.Value <> Empty
-    ActiveCell.Offset(0, 1).Activate
-Wend
-
-size = ActiveCell.column - 2
-
-ReDim headerVal(size)
-
-Cells(headerRow, 1).Activate
-
-For i = 0 To UBound(headerVal)
-    headerVal(i) = ActiveCell.Value
-    ActiveCell.Offset(0, 1).Activate
-Next i
-
-csvHeader = headerVal
-
+    Dim headerVal() As String, size As Integer, i As Integer
+    
+    Application.ScreenUpdating = False
+    Cells(1, 1).Activate
+    
+    While ActiveCell.Value <> "*comment"
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    headerRow = ActiveCell.Row
+    
+    
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(0, 1).Activate
+    Wend
+    
+    size = ActiveCell.column - 2
+    
+    ReDim headerVal(size)
+    
+    Cells(headerRow, 1).Activate
+    
+    For i = 0 To UBound(headerVal)
+        headerVal(i) = ActiveCell.Value
+        ActiveCell.Offset(0, 1).Activate
+    Next i
+    
+    csvHeader = headerVal
+    Application.ScreenUpdating = True
 
 End Function
 Function getUnique(x)
-Dim items() As String, size As Integer, i As Integer
 
-thisCol = headerSearch(x)
+    Dim items() As String, size As Integer, i As Integer
 
-Cells(headerRow + 1, thisCol).Activate
+    thisCol = headerSearch(x)
+    
+    Cells(headerRow + 1, thisCol).Activate
 
 
-    While ActiveCell.Value <> Empty
-        ActiveCell.Offset(1, 0).Activate
-    Wend
-
-    size = ActiveCell.Row - headerRow
+    size = getLastRecord - headerRow
     uniqueLast = ActiveCell.Row - 1
     
-'Debug.Print lastRecord
-'Debug.Print size
-
-ReDim items(size)
-assPosition = 1
-For i = headerRow + 1 To uniqueLast
-    items(assPosition) = Cells(i, thisCol).Value
-    assPosition = assPosition + 1
-Next i
-
-For i = LBound(items) To UBound(items)
-    For j = LBound(items) To UBound(items)
-        If j <> i Then
-            If items(i) = items(j) Then
-                items(j) = 0
-            End If
-        End If
-    Next j
-Next i
-
-count = 0
+    ReDim items(size - 1)
+    assPosition = 0
+    For i = headerRow + 1 To getLastRecord
+        items(assPosition) = Cells(i, thisCol).Value
+        assPosition = assPosition + 1
+    Next i
     
-For i = LBound(items) To UBound(items)
-    If items(i) <> "0" Then
-        count = count + 1
-    End If
-Next i
-
-ReDim uniqueItems(count) As String
-
-For i = LBound(uniqueItems) To UBound(uniqueItems)
-    For j = LBound(items) To UBound(items)
-        If items(j) <> "0" Then
-            uniqueItems(i) = items(j)
-            items(j) = 0
-            Exit For
-        End If
-    Next j
-Next i
+    For i = LBound(items) To UBound(items)
+        For j = LBound(items) To UBound(items)
+            If j <> i Then
+                If items(i) = items(j) Then
+                    items(j) = 0
+                End If
+            End If
+        Next j
+    Next i
+    
+    count = 0
         
-getUnique = uniqueItems
+    For i = LBound(items) To UBound(items)
+        If items(i) <> "0" Then
+            count = count + 1
+        End If
+    Next i
+    
+    ReDim uniqueItems(count - 1) As String
+    
+    For i = LBound(uniqueItems) To UBound(uniqueItems)
+        For j = LBound(items) To UBound(items)
+            If items(j) <> "0" Then
+                uniqueItems(i) = items(j)
+                items(j) = 0
+                Exit For
+            End If
+        Next j
+    Next i
+            
+    getUnique = uniqueItems
 
 End Function
 
 Function checkAssets(theseAssets)
         
-    If UBound(theseAssets) - LBound(theseAssets) - 1 = 1 Then
-        checkAssets = theseAssets(1)
+    If UBound(theseAssets) = 0 Then
+        checkAssets = theseAssets(0)
     Else
         checkAssets = "XA"
     End If
@@ -268,8 +281,11 @@ Function getMessageType()
     Set startCell = ActiveCell
     
     find ("Message Type")
+    
     ActiveCell.Offset(1, 0).Activate
+    
     If ActiveCell.Value = "Trade State" Then getMessageType = "TRD"
+    
     If ActiveCell.Value = "Valuation" Then getMessageType = "VAL"
     
     startCell.Activate
@@ -287,15 +303,13 @@ Function workingMessage()
 End Function
 
 Function getpath()
-
     getpath = ActiveWorkbook.Path & "\"
-    Debug.Print getpath
-
 End Function
 Function getPasteRow(sheetName)
+
     startsheet = ActiveSheet.Name
     Sheets(sheetName).Activate
-    Range("A1").Activate
+    findID
     
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(1, 0).Activate
@@ -309,30 +323,30 @@ End Function
 
 
 Function getArrayLength(x)
-    getArrayLength = UBound(x) - LBound(x) - 1
+    getArrayLength = UBound(x) - LBound(x)
 End Function
 Function assAbbr(AssetClass)
 
     If AssetClass = "ForeignExchange" Or AssetClass = "FX" Then
-        assAbbr = "FX"
+        assAbbr = "_FX"
     
     ElseIf AssetClass = "CU" Then
-        assAbbr = "CU"
+        assAbbr = "_CU"
     
     ElseIf AssetClass = "InterestRate" Or AssetClass = "IR" Then
-        assAbbr = "IR"
+        assAbbr = "_IR"
     
     ElseIf AssetClass = "Commodity" Or AssetClass = "CO" Then
-        assAbbr = "CO"
+        assAbbr = "_CO"
     
     ElseIf AssetClass = "Equity" Or AssetClass = "EQ" Then
-        assAbbr = "EQ"
+        assAbbr = "_EQ"
     
     ElseIf AssetClass = "Credit" Or AssetClass = "CR" Then
-        assAbbr = "CR"
+        assAbbr = "_CR"
         
     ElseIf AssetClass = "XA" Then
-        assAbbr = "XA"
+        assAbbr = "_XA"
         
     Else
         assAbbr = ""  'Asset Class not provided or recognized
@@ -415,3 +429,21 @@ headerSearch = i + 1
 
 End Function
 
+Function splitSelector(ByRef inArrs As Variant) As String()
+    Dim inArr As Variant
+    Dim outArr() As String
+    Dim i As Integer
+    With SplitSelectForm
+        For Each inArr In inArrs
+            .selectCombo.AddItem inArr
+        Next inArr
+        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
+        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
+        .Show
+        ReDim Preserve outArr(.orderList.ListCount - 1)
+        For i = 0 To (.orderList.ListCount - 1)
+            outArr(i) = .orderList.List(i)
+        Next i
+    End With
+    splitSelector = outArr
+End Function
