@@ -20,7 +20,7 @@ Public Function findAssetClass()
        Exit Function
    End If
     
-    Cells(searchPosition.Row, searchPosition.Column).Select
+    Cells(searchPosition.Row, searchPosition.column).Select
  
 End Function
 
@@ -43,7 +43,7 @@ Columns.AutoFit
        Exit Sub
    End If
     
-    Cells(searchPosition.Row, searchPosition.Column).Select
+    Cells(searchPosition.Row, searchPosition.column).Select
 
 End Sub
 Public Function findIt(findThis)
@@ -77,7 +77,7 @@ Cells(1, 1).Select
         False, SearchFormat:=False).Activate
         
         Set searchPosition = ActiveCell
-        findUSI = searchPosition.Column
+        findUSI = searchPosition.column
         
         Exit Function
         
