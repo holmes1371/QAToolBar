@@ -40,7 +40,7 @@ Public Function autoHeaderUniquinizerIngestF()
     
     'brings the active cell to the bottom of the TradeID column and autoFit's all columns
     findTradeIdField
-    Application.ScreenUpdating = True
+    If prepMode = False Then Application.ScreenUpdating = True
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(1, 0).Activate
     Wend
