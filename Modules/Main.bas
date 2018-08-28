@@ -1,4 +1,4 @@
-'QA Toolbar, v. 1.3.5
+'QA Toolbar, v. 1.4
 'Developed by Tom Holmes and Frank Castillo
 'Dtd: 08/15/2018
 
