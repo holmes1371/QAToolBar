@@ -4,7 +4,7 @@ Public Function trimmer()
 
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     Dim thisSheet As Range
-    Set thisSheet = Range(Cells(1, 1).Address(), Cells(mylastcell.Row, mylastcell.Column).Address())
+    Set thisSheet = Range(Cells(1, 1).Address(), Cells(mylastcell.Row, mylastcell.column).Address())
     
     Dim cel As Range
     
