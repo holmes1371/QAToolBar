@@ -18,7 +18,7 @@ Public Sub textToCol(control As IRibbonControl)
     
    'Do the parse
     objRange1.TextToColumns _
-    destination:=Range("A1"), _
+    Destination:=Range("A1"), _
         DataType:=xlDelimited, _
         TextQualifier:=xlDoubleQuote, _
         ConsecutiveDelimiter:=False, _

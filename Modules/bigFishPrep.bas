@@ -1,145 +1,62 @@
-Public headerRow
-Public checkBoxAction As Boolean
-Public checkBoxAsset As Boolean
+Public totalFiles   As Integer
+Public fileCount    As Integer
+Public tempSheet    As String
+Public csvHeader    As Variant
+Public headerRow    As Integer
+Public prepMode     As Boolean
+Public newArr()     As String
+Public proceedSplit As Boolean
+
 Option Compare Text
 
-Sub bigFishPrep(control As IRibbonControl)
-
-If checkBoxAsset = False And checkBoxAction = False Then
-    MsgBox "Please select 'Action Split' and/or 'Asset Split'", vbInformation, "Warning."
-    GoTo bothFalse
-End If
-
-utiMode = "auto"
-workingMessage
-autoHeaderUniquinizerIngestF
-Application.ScreenUpdating = False
-startSheet = ActiveSheet.Name
-uniqueAss = getUnique("asset")
-
-counter = 0
-
-'create random names for sheets
-tempSheet = "working" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
-newSheet = "new" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
-exitSheet = "exit" & CStr(Int((500000 - 1 + 1) * Rnd + 1))
-
-For i = 1 To UBound(uniqueAss)
-    If checkBoxAction = True And checkBoxAsset = False Then GoTo actionStart
-    If uniqueAss(i) = "" Then Exit For
-    counter = counter + 1
-    createTempSheet (tempSheet)
-    For j = headerRow + 1 To getLastRecord
-        If Cells(j, getAssClassCol).Value = uniqueAss(i) Then
-            Rows(j).Copy
-            Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
-            Operation:= _
-            xlNone, SkipBlanks:=False, Transpose:=False
-        End If
-    Next j
-    Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).Value = getTrailer
-    Sheets(tempSheet).Activate 'sheet has been split by asset
+Sub splitFiles(control As IRibbonControl)
     
-    If checkBoxAsset = True And checkBoxAction = False Then
-        Call makeNewBook(getMessageType, uniqueAss(i), tempSheet)
-        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
-        GoTo skipAhead
-    End If
+    setStartVals
     
-actionStart:
-    uniqueAction = getUnique("action")
-    
-    If checkBoxAction = True And checkBoxAsset = False Then
-        For k = 1 To UBound(uniqueAction)
-            If uniqueAction(k) = "" Then Exit For
-            counter = counter + 1
-            createTempSheet (tempSheet)
-            For j = headerRow + 1 To getLastRecord
-                If Cells(j, getActionCol).Value = uniqueAction(k) Then
-                    Rows(j).Copy
-                    Sheets(tempSheet).Range("A" & getPasteRow(tempSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
-                    Operation:= _
-                    xlNone, SkipBlanks:=False, Transpose:=False
-                End If
-            Next j
-            
-            Call makeNewBook(uniqueAction(k), checkAssets(uniqueAss, tempSheet), tempSheet)
-            Call deleteTheSheets(tempSheet, newSheet, exitSheet)
-        Next k
-        GoTo finishLine
-    End If
-    
-    If getActionLength(uniqueAction) = 1 Then 'if only 1 action type, new file is created
-        Call makeNewBook(uniqueAction(1), uniqueAss(i), tempSheet)
-        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
-    Else
-   
-    Call createNewExit(headerRow, newSheet, exitSheet)
-    
-        For k = headerRow + 1 To getLastRecord
-            If Cells(k, getActionCol).Value = "new" Then
-                Rows(k).Copy
-                Sheets(newSheet).Range("A" & getPasteRow(newSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-                xlNone, SkipBlanks:=False, Transpose:=False
-            End If
-            If Cells(k, getActionCol).Value = "exit" Then
-                Rows(k).Copy
-                Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-                xlNone, SkipBlanks:=False, Transpose:=False
-            End If
-        Next k
-        
-        Sheets(newSheet).Range("A" & getPasteRow(newSheet)).Value = getTrailer
-        Sheets(exitSheet).Range("A" & getPasteRow(exitSheet)).Value = getTrailer
-        
-        Call makeNewBook("NEW", uniqueAss(i), newSheet)
-        Call makeNewBook("EXIT", uniqueAss(i), exitSheet)
-        counter = counter + 1
-        Call deleteTheSheets(tempSheet, newSheet, exitSheet)
-      End If
-skipAhead:
-
-Next i
-
-finishLine:
-    Unload Working
-    refreshScreen
-    resetSearchParameters
-    MsgBox counter & " Files have been successfully created", vbInformation, "Complete"
-    retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
-bothFalse:
-    refreshScreen
-    If Working.Visible = True Then Unload Working
-    Cells(1, 1).Activate
-End Sub
-Function checkAssets(uniqueAss, sheetName)
-    thisSheet = ActiveSheet.Name
-    Sheets(sheetName).Activate
-    theseAssets = getUnique("asset")
-    
-    If UBound(theseAssets) - LBound(theseAssets) - 1 = 1 Then
-        checkAssets = theseAssets(1)
-    Else
-        checkAssets = "XA"
-    End If
-    
-    Sheets(thisSheet).Activate
-
-End Function
-Function getMessageType()
     Set startCell = ActiveCell
+    utiMode = "auto"
     
-    find ("Message Type")
-    ActiveCell.Offset(1, 0).Activate
-    If ActiveCell.Value = "Trade State" Then getMessageType = "TRD"
-    If ActiveCell.Value = "Valuation" Then getMessageType = "VAL"
+    setHeaderVals
     
-    startCell.Activate
+    splitoptions = SplitSelector(csvHeader)
+    
+    If endIt = True Then
+        refreshScreen
+        Exit Sub
+    End If
+    
+    setTotalFiles (splitoptions)
+    setHeaderVals
+    autoHeaderUniquinizerIngestF
+    progressBarMessage
+    
+    Application.ScreenUpdating = False
+    
+    startsheet = ActiveSheet.Name
 
-End Function
-Function workingMessage()
+    Call splitThisSheet(ActiveSheet.Name, splitoptions)
     
-    With Working
+    verifyFinal (splitoptions)
+
+    Unload ProgressBar
+    refreshScreen
+    startCell.Activate
+    resetSearchParameters
+    
+    If fileCount = 0 Then
+        MsgBox "No files have been created", vbInformation, "Complete"
+    Else
+        MsgBox fileCount & " files have been successfully created", vbInformation, "Complete"
+        'open fileExplorer to the location where files are saved
+        retVal = Shell("explorer.exe " & getpath, vbNormalFocus)
+    End If
+    
+    prepMode = False
+    
+End Sub
+Function progressMessage()
+
+    With ProgressBar
         .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
         .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
         .Show vbModeless
@@ -147,49 +64,90 @@ Function workingMessage()
     End With
     
 End Function
+Function splitThisSheet(sheetName As String, criteria)
 
-Function getpath()
-
-    getpath = ActiveWorkbook.Path & "\"
-    Debug.Print getpath
-
-End Function
-Function getPasteRow(sheetName)
-    startSheet = ActiveSheet.Name
     Sheets(sheetName).Activate
-    Range("A1").Activate
+
+    For Each opt In criteria
+
+        tempUnique = getUnique(opt)
+        
+        If UBound(tempUnique) = 0 Then
+            GoTo skipIt:
+        Else
+            For i = LBound(tempUnique) To UBound(tempUnique)
+            tempSheet = tempSheet + 1
+            createTempSheet (CStr(tempSheet))
+            Call doCopy(sheetName, CStr(tempSheet), headerSearch(opt), tempUnique(i))
+            Call splitThisSheet(CStr(tempSheet), criteria)
+            Next i
+        End If
     
-    While ActiveCell.Value <> Empty
-        ActiveCell.Offset(1, 0).Activate
-    Wend
-    
-    getPasteRow = ActiveCell.Row
-    
-    Sheets(startSheet).Activate
+skipIt:
+    Next opt
 
 End Function
-Function getNamePart(ActionType, AssetClass, sheetName)
+Function verifyFinal(criteria)
 
-    thispath = ActiveWorkbook.Path & "\"
-    Debug.Print thispath
-    startSheet = ActiveSheet.Name
-    Sheets(sheetName).Activate
-    testName = getUnique("*comment")
-    testLength = UBound(testName) - LBound(testName) - 2
-    If testLength = 1 Then
-        testNumber = testName(1)
-    Else
-        testNumber = "MTC"
-    End If
+Application.DisplayAlerts = False
     
-    getNamePart = thispath & testNumber & "_INPUT_" & assAbbr(AssetClass) & "_ESMA_" & UCase(ActionType)
-    'Debug.Print getNamePart
-    Sheets(startSheet).Activate
+    For i = 1 To tempSheet
     
+        Sheets(CStr(i)).Activate
+        
+        For j = LBound(criteria) To UBound(criteria)
+            isFinished = False
+            tempUnique = getUnique(criteria(j))
+            If UBound(tempUnique) <> 0 Then Exit For
+            isFinished = True
+skipIt:
+        Next j
+
+        If isFinished = True Then
+            Call makeNewBook(criteria, CStr(i))
+            fileCount = fileCount + 1
+            
+            With ProgressBar
+                .Text.Caption = CStr(Round(((fileCount / totalFiles) * 100), 2)) & "% Complete"
+                .Bar.Width = ((fileCount / totalFiles) * 100) * 2
+            End With
+            DoEvents
+            
+            Sheets(CStr(i)).Delete
+        Else
+            Sheets(CStr(i)).Delete
+        End If
+    Next i
+
+Application.DisplayAlerts = True
+
 End Function
-Function makeNewBook(ActionType, AssetClass, sheetName)
-'
-    fileName = getNamePart(ActionType, AssetClass, sheetName)
+Function progressBarMessage()
+    With ProgressBar
+        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
+        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
+        .Show vbModeless
+        .Repaint
+    End With
+End Function
+Function setTotalFiles(criteria)
+
+Dim totalNumber As Integer
+
+    totalNumber = 1
+    
+    For i = LBound(criteria) To UBound(criteria)
+        totalNumber = totalNumber * (UBound(getUnique(criteria(i))) + 1)
+    Next i
+    
+    totalFiles = totalNumber
+        
+    
+
+End Function
+Function makeNewBook(criteria, sheetName)
+
+    fileName = getNamePart(criteria, sheetName)
 
     Worksheets(sheetName).Copy
     
@@ -201,31 +159,246 @@ Function makeNewBook(ActionType, AssetClass, sheetName)
     End With
 
 End Function
-Function getActionLength(uniqueAction)
-    getActionLength = UBound(uniqueAction) - LBound(uniqueAction) - 1
+Function getNamePart(criteria, sheetName)
+
+    thispath = ActiveWorkbook.Path & "\"
+    startsheet = ActiveSheet.Name
+    Sheets(sheetName).Activate
+    testName = getUnique("*comment")
+    testLength = UBound(testName)
+    
+    If testLength = 0 Then
+        If testName(0) = "" Then testName(0) = "BLANK"
+        testNumber = testName(0)
+    Else
+        testNumber = "MTC"
+    End If
+    
+    Sheets(sheetName).Range("A" & getPasteRow(sheetName)).Value = getTrailer
+    
+    AssetClass = checkAssets(getUnique(Cells(headerRow, getAssClassCol).Value))
+    
+    Dim endPart As String
+    
+    For i = 0 To UBound(criteria)
+        If criteria(i) = "Asset Class" Or criteria(i) = "Primary Asset Class" Then GoTo skipIt
+        appendage = getUnique(criteria(i))
+        If appendage(0) = "" Then appendage(0) = "blank"
+        endPart = endPart & "_" & UCase(appendage(0))
+skipIt:
+    Next i
+    
+    If hasUTI(criteria) = True Then
+        getNamePart = thispath & testNumber & "_INPUT" & "_ESMA" & endPart
+    Else
+        getNamePart = thispath & testNumber & "_INPUT" & assAbbr(AssetClass) & "_ESMA" & endPart
+    End If
+    
+    Sheets(startsheet).Activate
+    
+End Function
+Function hasUTI(criteria) As Boolean
+
+     hasUTI = False
+     For i = LBound(criteria) To UBound(criteria)
+        If criteria(i) = "UTI" Or criteria(i) = "UTI ID" Or criteria(i) = "Trade ID" Then hasUTI = True
+    Next i
+
+End Function
+
+Function doCopy(parentSheet, targetSheet As String, icol, criteria)
+
+    startsheet = ActiveSheet.Name
+    Sheets(parentSheet).Activate
+    
+        For j = headerRow + 1 To getLastRecord
+            If CStr(Cells(j, icol).Value) = criteria Then
+                Rows(j).Copy
+                Sheets(targetSheet).Range("A" & getPasteRow(targetSheet)).PasteSpecial Paste:=xlPasteValuesAndNumberFormats, _
+                Operation:= _
+                xlNone, SkipBlanks:=False, Transpose:=False
+            End If
+        Next j
+           
+    Sheets(startsheet).Activate
+    
+End Function
+Function createTempSheet(tempSheet As String)
+    startsheet = ActiveSheet.Name
+    Worksheets.Add
+    ActiveSheet.Name = tempSheet
+    Sheets(startsheet).Activate
+    Rows("1:" & headerRow).Copy
+    Sheets(tempSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
+    Application.CutCopyMode = False
+    Sheets(startsheet).Activate
+End Function
+
+Function setHeaderVals()
+
+    Dim headerVal()  As String
+    Dim size         As Integer
+    Dim i            As Integer
+    
+    Application.ScreenUpdating = False
+    Cells(1, 1).Activate
+    
+    While ActiveCell.Value <> "*comment"
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    headerRow = ActiveCell.Row
+    
+    
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(0, 1).Activate
+    Wend
+    
+    size = ActiveCell.column - 2
+    
+    ReDim headerVal(size)
+    
+    Cells(headerRow, 1).Activate
+    
+    For i = 0 To UBound(headerVal)
+        headerVal(i) = ActiveCell.Value
+        ActiveCell.Offset(0, 1).Activate
+    Next i
+    
+    csvHeader = headerVal
+    
+    Application.ScreenUpdating = True
+
+End Function
+Function getUnique(x)
+
+    Dim items() As String
+    Dim size    As Integer
+    Dim i       As Integer
+    Dim thisCol As Integer
+    
+
+    thisCol = headerSearch(x)
+    
+    Cells(headerRow + 1, thisCol).Activate
+
+
+    size = getLastRecord - headerRow
+    uniqueLast = ActiveCell.Row - 1
+    
+    ReDim items(size - 1)
+    assPosition = 0
+    For i = headerRow + 1 To getLastRecord
+        items(assPosition) = Cells(i, thisCol).Value
+        assPosition = assPosition + 1
+    Next i
+    
+    For i = LBound(items) To UBound(items)
+        For j = LBound(items) To UBound(items)
+            If j <> i Then
+                If items(i) = items(j) Then
+                    items(j) = 0
+                End If
+            End If
+        Next j
+    Next i
+    
+    count = 0
+        
+    For i = LBound(items) To UBound(items)
+        If items(i) <> "0" Then
+            count = count + 1
+        End If
+    Next i
+    
+    ReDim uniqueItems(count - 1) As String
+    
+    For i = LBound(uniqueItems) To UBound(uniqueItems)
+        For j = LBound(items) To UBound(items)
+            If items(j) <> "0" Then
+                uniqueItems(i) = items(j)
+                items(j) = 0
+                Exit For
+            End If
+        Next j
+    Next i
+            
+    getUnique = uniqueItems
+
+End Function
+
+Function checkAssets(theseAssets)
+        
+    If UBound(theseAssets) = 0 Then
+        checkAssets = theseAssets(0)
+    Else
+        checkAssets = "XA"
+    End If
+
+
+End Function
+Function getMessageType()
+    Set startCell = ActiveCell
+    
+    find ("Message Type")
+    
+    ActiveCell.Offset(1, 0).Activate
+    
+    If ActiveCell.Value = "Trade State" Then getMessageType = "TRD"
+    
+    If ActiveCell.Value = "Valuation" Then getMessageType = "VAL"
+    
+    startCell.Activate
+
+End Function
+
+Function getpath()
+
+    getpath = ActiveWorkbook.Path & "\"
+    
+End Function
+Function getPasteRow(sheetName)
+
+    startsheet = ActiveSheet.Name
+    Sheets(sheetName).Activate
+    findID
+    
+    While ActiveCell.Value <> Empty
+        ActiveCell.Offset(1, 0).Activate
+    Wend
+    
+    getPasteRow = ActiveCell.Row
+    
+    Sheets(startsheet).Activate
+
+End Function
+
+
+Function getArrayLength(x)
+    getArrayLength = UBound(x) - LBound(x)
 End Function
 Function assAbbr(AssetClass)
 
     If AssetClass = "ForeignExchange" Or AssetClass = "FX" Then
-        assAbbr = "FX"
+        assAbbr = "_FX"
     
     ElseIf AssetClass = "CU" Then
-        assAbbr = "CU"
+        assAbbr = "_CU"
     
     ElseIf AssetClass = "InterestRate" Or AssetClass = "IR" Then
-        assAbbr = "IR"
+        assAbbr = "_IR"
     
     ElseIf AssetClass = "Commodity" Or AssetClass = "CO" Then
-        assAbbr = "CO"
+        assAbbr = "_CO"
     
     ElseIf AssetClass = "Equity" Or AssetClass = "EQ" Then
-        assAbbr = "EQ"
+        assAbbr = "_EQ"
     
     ElseIf AssetClass = "Credit" Or AssetClass = "CR" Then
-        assAbbr = "CR"
+        assAbbr = "_CR"
         
     ElseIf AssetClass = "XA" Then
-        assAbbr = "XA"
+        assAbbr = "_XA"
         
     Else
         assAbbr = ""  'Asset Class not provided or recognized
@@ -236,68 +409,7 @@ End Function
 Function getTrailer()
     getTrailer = Left(Cells(1, 1), 5) & "-END"
 End Function
-Function getUnique(x)
-Dim assets() As String, size As Integer, i As Integer
-Cells(1, 1).Activate
-If x = "asset" Then
-    findAssetClass
-Else
-    find (x)
-End If
 
-headerRow = ActiveCell.Row
-thisCol = ActiveCell.Column
-
-    While ActiveCell.Value <> Empty
-        ActiveCell.Offset(1, 0).Activate
-    Wend
-
-    size = ActiveCell.Row - headerRow - 1
-    uniqueLast = ActiveCell.Row - 1
-    
-'Debug.Print lastRecord
-'Debug.Print size
-
-ReDim assets(size)
-assPosition = 1
-For i = headerRow + 1 To uniqueLast
-    assets(assPosition) = Cells(i, thisCol).Value
-    assPosition = assPosition + 1
-Next i
-
-For i = LBound(assets) To UBound(assets)
-    For j = LBound(assets) To UBound(assets)
-        If j <> i Then
-            If assets(i) = assets(j) Then
-                assets(j) = 0
-            End If
-        End If
-    Next j
-Next i
-
-count = 0
-    
-For i = LBound(assets) To UBound(assets)
-    If assets(i) <> "0" Then
-        count = count + 1
-    End If
-Next i
-
-ReDim uniqueAssets(count) As String
-
-For i = LBound(uniqueAssets) To UBound(uniqueAssets)
-    For j = LBound(assets) To UBound(assets)
-        If assets(j) <> "0" Then
-            uniqueAssets(i) = assets(j)
-            assets(j) = 0
-            Exit For
-        End If
-    Next j
-Next i
-        
-getUnique = uniqueAssets
-
-End Function
 Function deleteTheSheets(tempSheet, newSheet, exitSheet)
 
 On Error GoTo niceExit
@@ -310,24 +422,15 @@ On Error GoTo niceExit
 niceExit:
 
 End Function
-Function createTempSheet(tempSheet)
-    startSheet = ActiveSheet.Name
-    Worksheets.Add
-    ActiveSheet.Name = tempSheet
-    Sheets(startSheet).Activate
-    Rows("1:" & headerRow).Copy
-    Sheets(tempSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
-        xlNone, SkipBlanks:=False, Transpose:=False
-    Sheets(startSheet).Activate
-End Function
+
 
 Function createNewExit(headerRow, newSheet, exitSheet)
-    startSheet = ActiveSheet.Name
+    startsheet = ActiveSheet.Name
     Worksheets.Add
     ActiveSheet.Name = newSheet
     Worksheets.Add
     ActiveSheet.Name = exitSheet
-    Sheets(startSheet).Activate
+    Sheets(startsheet).Activate
     Rows("1:" & headerRow).Copy
     Sheets(newSheet).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
         xlNone, SkipBlanks:=False, Transpose:=False
@@ -337,23 +440,25 @@ Function createNewExit(headerRow, newSheet, exitSheet)
 End Function
 
 Function getAssClassCol()
-Set startCell = ActiveCell
-findAssetClass
-getAssClassCol = ActiveCell.Column
-Debug.Print getAssClassCol
-startCell.Activate
+
+    Set startCell = ActiveCell
+    findAssetClass
+    getAssClassCol = ActiveCell.column
+    startCell.Activate
 
 End Function
 
 Function getActionCol()
-Set startCell = ActiveCell
-find ("action")
-getActionCol = ActiveCell.Column
-Debug.Print getActionCol
-startCell.Activate
+
+    Set startCell = ActiveCell
+    find ("action")
+    getActionCol = ActiveCell.column
+    startCell.Activate
+    
 End Function
 
 Function getLastRecord()
+
     Set startCell = ActiveCell
     find ("action")
     
@@ -363,18 +468,84 @@ Function getLastRecord()
     
     getLastRecord = ActiveCell.Row - 1
     startCell.Activate
-    Debug.Print getLastRecord
+    
+End Function
+
+
+Function headerSearch(columnName) 'returns column number
+
+For i = 0 To UBound(csvHeader)
+    If csvHeader(i) = columnName Then Exit For
+Next i
+
+headerSearch = i + 1
 
 End Function
 
-Sub chkBoxAction_onAction(control As IRibbonControl, pressed As Boolean)
-    
-        checkBoxAction = pressed
-        
-End Sub
+Function SplitSelector(inArrs As Variant) As Variant
 
-Sub chkBoxAsset_onAction(control As IRibbonControl, pressed As Boolean)
+    Dim inArr As Variant
+    Dim outArr() As String
+    Dim sortAr() As String
+    Dim i As Integer
     
-      checkBoxAsset = pressed
+    For i = 0 To UBound(inArrs)
+        ReDim Preserve newArr(i)
+        newArr(i) = inArrs(i)
+    Next i
+    On Error GoTo hardExit
+    sortAr = sortArray(newArr)
+    proceedSplit = False
+    With SplitSelectForm
+        For Each inArr In sortAr
+            .optionList.AddItem inArr
+        Next inArr
+        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
+        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
+        .Show
+        If proceedSplit = True Then
+            ReDim Preserve outArr(.selectedList.ListCount - 1)
+            For i = 0 To (.selectedList.ListCount - 1)
+                outArr(i) = .selectedList.List(i)
+            Next i
+        Else
+            GoTo hardExit
+        End If
+    End With
+    SplitSelector = outArr
+    Exit Function
     
-End Sub
+hardExit:
+    proceedSplit = False
+    endIt = True
+    
+End Function
+
+Function sortArray(arr As Variant) As String()
+
+    Dim i As Integer
+    Dim j As Integer
+    Dim tmp
+    
+    For i = LBound(arr) To UBound(arr)
+        For j = i + 1 To UBound(arr)
+            If UCase(arr(i)) > UCase(arr(j)) Then
+                tmp = arr(j)
+                arr(j) = arr(i)
+                arr(i) = tmp
+            End If
+        Next j
+    Next i
+    
+    sortArray = arr
+    
+End Function
+
+Function setStartVals()
+    
+    endIt = False
+    prepMode = True
+    fileCount = 0
+    tempSheet = 0
+
+End Function

@@ -1,4 +1,4 @@
-'QA Toolbar, v. 1.3.5
+'QA Toolbar, v. 1.4
 'Developed by Tom Holmes and Frank Castillo
 'Dtd: 08/15/2018
 
@@ -63,7 +63,7 @@ Sub findTradeID(control As IRibbonControl)
     findID
     If foundOne = True Then
         Application.ScreenUpdating = True
-        Cells(searchPosition.Row, searchPosition.Column).Select
+        Cells(searchPosition.Row, searchPosition.column).Select
     End If
     finalReset
 End Sub
