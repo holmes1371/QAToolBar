@@ -1,28 +1,99 @@
+Option Explicit
+
+
 Sub csvToFpml(control As IRibbonControl)
-    'Invoke CSV To FPML window and place it in the middle of the Excel window
-    With csvToFpmlForm
-        .Left = Application.Left + (0.5 * Application.Width) - (0.5 * .Width)
-        .Top = Application.Top + (0.5 * Application.Height) - (0.5 * .Height)
-        .Show
-    End With
+'    Dim taxArr    As Variant
+'    Dim trnxArr   As Variant
+'    Dim taxonomy  As String
+    Dim schemaTxt As String
+'
+'    taxArr = readFile(selectFile("file", "Select Taxonomy File"))
+'
+'    taxonomy = arraySearch(taxArr, "FOREIGNEXCHANGE:NDF", 1, 4)
+    
+    schemaTxt = getSchema("fxSingleLeg")
+    
+    Debug.Print schemaTxt
+    Call endIESess
 End Sub
 
-Sub parseFields(taxFilePath, fpmlFldPath)
-    Dim i As Integer
-    Dim j As Integer
-    Dim taxArr() As Variant
-    Dim taxLen   As Integer
-    Dim taxText  As String
+Function getSchema(name As String) As String
+    Dim source As IHTMLElement
+    Dim compnt As IHTMLElement
+    Dim schema As IHTMLElement
+    Dim repsum As IHTMLElement
+    Dim repArr() As String
+    Dim repLine  As Variant
+    Dim xmlUrl   As String
     
-    taxArr = readFile(taxFilePath)
-    taxLen = UBound(taxArr)
-        
-    For i = 0 To taxLen
-        taxText = taxText & Join(taxArr(i), ",") & vbNewLine
-    Next i
+    xmlUrl = "http://www.fpml.org/spec/fpml-5-6-1-wd-1/html/recordkeeping/schemaDocumentation/schemas/fpml-main-5-6_xsd/schema-overview.html"
     
-    MsgBox taxText
+    For Each source In getUrl(xmlUrl, "t2")
+        For Each compnt In source.document.getElementsByClassName("f22")
+            For Each schema In getUrl(compnt.href, "f22")
+                If schema.innerText = name Then
+                    For Each repsum In getUrl(schema.href, "f36")
+                        getSchema = repsum.innerHTML
+                        Exit Function
+'                        repArr = Split(repsum.all.Item(0).innerText, vbNewLine)
+'                        For Each repLine In repArr
+'                            getSchema = repLine
+'                        Next repLine
+                    Next repsum
+                End If
+            Next schema
+        Next compnt
+    Next source
+End Function
+
+Function getUrl(url As String, className As String)
+    Dim ie As InternetExplorer
+    
+    Set ie = New InternetExplorer
+    
+    With ie
+        .Visible = False
+        .RegisterAsBrowser = True
+        .navigate url
+        While .Busy Or .readyState <> 4: DoEvents: Wend
+        Set getUrl = .document.getElementsByClassName(className)
+    End With
+    
+    Set ie = Nothing
+End Function
+
+Sub endIESess()
+    Dim wmSess As Object
+    Dim wmProc As Object
+    Set wmSess = GetObject("winmgmts://.").ExecQuery("SELECT * FROM Win32_Process WHERE Name = 'iexplore.exe'")
+    For Each wmProc In wmSess
+        Call wmProc.Terminate
+    Next wmProc
+    
+    Set wmSess = Nothing
+    Set wmProc = Nothing
 End Sub
+
+Function arrToText(arr As Variant) As String
+    Dim obj As Object
+    Dim txt As String
+    For Each obj In arr
+        txt = txt & Join(obj, ",") & vbNewLine
+    Next obj
+    arrToText = txt
+End Function
+
+'Searches array and returns nth value
+Function arraySearch(arr As Variant, searchStr As String, isdaIdx As Integer, taxIdx As Integer) As String
+    Dim line As Variant
+    Dim bool As Boolean
+    For Each line In arr
+        If StrComp(line(isdaIdx), searchStr, vbTextCompare) = 0 Then
+            arraySearch = Replace(line(taxIdx), "/", "")
+            Exit Function
+        End If
+    Next line
+End Function
 
 'Function for a reading file
 Function readFile(filePath)
@@ -56,35 +127,38 @@ Function readFile(filePath)
     readFile = outArr
 End Function
 
+Sub writeFile(content As String, path As String)
+    Dim FSO As Object
+    Dim obj As Object
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    Set obj = FSO.createTextFile(path)
+    obj.WriteLine content
+    obj.Close
+End Sub
+
 'Invokes file or folder picker, depending on string passed.
 'Returns path of object selected
-Function selectFile(name As String) As String
+Function selectFile(ftype As String, title As String) As String
     Dim fileDiag As FileDialog
-    Dim selItems As String
-    Dim diagType As Object
-    Dim diagName As String
     
     'Conditional based on whether name is file or fldr
-    Select Case name
+    Select Case ftype
         Case "file"
             Set fileDiag = Application.FileDialog(msoFileDialogFilePicker)
-            diagName = "Select Taxonomy File"
         Case "fldr"
             Set fileDiag = Application.FileDialog(msoFileDialogFolderPicker)
-            diagName = "Select FPML Files Destination"
     End Select
     
     'Sets properties for picker
     With fileDiag
-        .Title = diagName
-        If name = "file" Then
+        .title = title
+        If ftype = "file" Then
             .AllowMultiSelect = False
             .Filters.Clear
             .Filters.Add "Comma Separated Values file", "*.csv"
         End If
-        If .Show = True Then selItems = .SelectedItems(1)
+        'Returns path selected as a string
+        If .Show = True Then selectFile = .SelectedItems(1)
     End With
-    
-    'Returns path selected as a string
-    selectFile = selItems
 End Function
