@@ -5,7 +5,7 @@ Public Function SheetFixIngestF()
 ' Googled meaning of ";@" by Frank Castillo fcastilloandino@dtcc.com
     
     startCell = ActiveCell.Address
-    Application.ScreenUpdating = False
+    'Application.ScreenUpdating = False
     trimmer
 
     'makeBland 'removes any coloring or special formatting to the text
@@ -48,7 +48,7 @@ Public Function SheetFixIngestF()
     'Clear Formatting
     Application.FindFormat.Clear
     Application.ReplaceFormat.Clear
-    Application.ScreenUpdating = True
+    'Application.ScreenUpdating = True
     
     Columns.AutoFit
     Range(startCell).Select
