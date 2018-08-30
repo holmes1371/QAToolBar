@@ -7,11 +7,10 @@ Public Sub gtxValue_onChange(control As IRibbonControl, Text As String)
     gtxString = Text
 End Sub
 
-Public Function autoHeaderUniquinizerIngestF()
+Public Function autoHeaderUniquinizerIngestF(Optional buttonIndicator As Variant)
 ' Developed by Delfino Ballesteros and Tom Holmes
 
     SheetFixIngestF
-    Application.ScreenUpdating = False
         
     If precheck = False Then Exit Function  'precheck for required fields.
     Set startCell = ActiveCell
@@ -23,11 +22,12 @@ Public Function autoHeaderUniquinizerIngestF()
     Dim rCount As Integer
       
     findTradeIdField
+    'Application.ScreenUpdating = False
     rCount = getRCount
     
     'sets the new tradeID
     For i = 0 To numOfTrades
-        ActiveCell.Value = formatTradeId(rCount, ActiveCell.Row)
+        ActiveCell.Value = formatTradeId(rCount, ActiveCell.row)
         rCount = getLastFour
         ActiveCell.Offset(1, 0).Select
         If spillOverCheck = True Then Exit For ' prevents extra ID's due to hidden characters
@@ -40,7 +40,8 @@ Public Function autoHeaderUniquinizerIngestF()
     
     'brings the active cell to the bottom of the TradeID column and autoFit's all columns
     findTradeIdField
-    If prepMode = False Then Application.ScreenUpdating = True
+    
+    If IsMissing(buttonIndicator) = False Then Application.ScreenUpdating = True
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(1, 0).Activate
     Wend
@@ -53,7 +54,7 @@ Function spillOverCheck()
 'this function prevents a possible error of creating extra UTI ID's
 'due to hidden characters in an excel spreadsheet that cannot be deleted.
 
-    If Application.WorksheetFunction.CountA(Rows(ActiveCell.Row)) <= 3 Then
+    If Application.WorksheetFunction.CountA(Rows(ActiveCell.row)) <= 3 Then
         spillOverCheck = True
     End If
     
@@ -109,8 +110,8 @@ Function formatTradeId(count As Integer, currentRow) As String
 End Function
 Function getTestNumber()
     On Error GoTo notNumber
-    If Trim(Len(Cells(ActiveCell.Row, 1).Value)) = 6 Then
-        getTestNumber = Int(Cells(ActiveCell.Row, 1).Value)
+    If Trim(Len(Cells(ActiveCell.row, 1).Value)) = 6 Then
+        getTestNumber = Int(Cells(ActiveCell.row, 1).Value)
     End If
     Exit Function
     
@@ -177,7 +178,7 @@ Function usiCheck()
     If usiActive = True Then
         ActiveCell.Offset(1, 0).Select
         Set searchPosition = ActiveCell
-        thisRow = ActiveCell.Row
+        thisRow = ActiveCell.row
         Range(Cells(thisRow, idcolumn), Cells(lastRow, idcolumn)).Select
         Selection.Copy
         searchPosition.Select
@@ -201,12 +202,12 @@ On Error GoTo handleErrorAction
         SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False).Activate
         
         actioncolumn = ActiveCell.column
-        headerRow = ActiveCell.Row
+        headerRow = ActiveCell.row
         ActiveCell.Offset(1, 0).Select
         
-        For i = headerRow To mylastcell.Row
+        For i = headerRow To mylastcell.row
             If Trim(ActiveCell.Value) = "exit" Then
-                exitTradeRow = ActiveCell.Row
+                exitTradeRow = ActiveCell.row
                 tradeName = Cells(exitTradeRow, 1).Value
                 Columns("A:A").Select
 
@@ -214,13 +215,13 @@ On Error GoTo handleErrorAction
                 LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                 SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
                 
-                If ActiveCell.Row = exitTradeRow Then
+                If ActiveCell.row = exitTradeRow Then
                     Selection.find(what:=tradeName, After:=ActiveCell, _
                     LookIn:=xlFormulas, LookAt:=xlWhole, SearchOrder:=xlByRows, _
                     SearchDirection:=xlNext, MatchCase:=True, SearchFormat:=False).Activate
                 End If
  
-                If ActiveCell.Value = tradeName And Trim(Cells(ActiveCell.Row, actioncolumn).Value) = _
+                If ActiveCell.Value = tradeName And Trim(Cells(ActiveCell.row, actioncolumn).Value) = _
                  "new" Then
                     ActiveCell.Offset(0, idcolumn - 1).Select
                     tradeid = ActiveCell.Value
@@ -262,7 +263,7 @@ End Function
 Function getRCount()
     Dim runningCounter As Integer
     Dim currCount As Integer
-    Set returncell = ActiveCell
+    Set returnCell = ActiveCell
     For i = 0 To numOfTrades
         If ActiveCell.Value <> Empty Then
             currCount = getLastFour
@@ -277,7 +278,7 @@ Function getRCount()
         End If
     Next i
     getRCount = runningCounter
-    returncell.Activate
+    returnCell.Activate
 End Function
  
 Function todaysDate() As String
@@ -315,13 +316,13 @@ Function numOfTrades() As Integer
     numOfTrades = lastRow - 1 - headerCount
 End Function
 Function lastRow() 'action is a mandatory field for all templates
-   Set returncell = ActiveCell
+   Set returnCell = ActiveCell
     find ("Action")
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(1, 0).Activate
     Wend
-    lastRow = ActiveCell.Row
-    returncell.Activate
+    lastRow = ActiveCell.row
+    returnCell.Activate
 End Function
 
 
