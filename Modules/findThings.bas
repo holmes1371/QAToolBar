@@ -1,7 +1,9 @@
+Public searchPosition As Object
+Public foundOne As Boolean
+Public usiActive As Boolean
+
+Option Explicit
 Option Compare Text
-Public searchPosition
-Public foundOne
-Public usiActive
 
 Public Function findAssetClass()
     Cells(1, 1).Select
@@ -12,7 +14,7 @@ Public Function findAssetClass()
             
    If foundOne = False Then
         MsgBox "Could not find Asset Class field", vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
+        'Application.ScreenUpdating = True
         Cells(1, 1).Select
         endIt = True
     resetSearchParameters
@@ -20,31 +22,43 @@ Public Function findAssetClass()
        Exit Function
    End If
     
-    Cells(searchPosition.Row, searchPosition.column).Select
+    Cells(searchPosition.row, searchPosition.column).Select
  
 End Function
 
-Public Sub findID()
-Cells(1, 1).Select
-foundOne = False
-Columns.AutoFit
+Public Sub findID(Optional buttonIndicator As Variant)
 
-    findIt ("UTI")
-    findIt ("UTI ID")
-    findIt ("Trade ID")
-        
-   If foundOne = False Then
-        MsgBox "Could not find UTI ID/UTI or Trade ID field", vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
-        Cells(1, 1).Select
-        
-    resetSearchParameters
-  
-       Exit Sub
-   End If
+    Dim i As Integer
+    Columns.AutoFit
+
+    setHeaderVals
     
-    Cells(searchPosition.Row, searchPosition.column).Select
-
+    For i = LBound(csvHeader) To UBound(csvHeader)
+    
+        If csvHeader(i) = "UTI" Then
+            Set searchPosition = Cells(headerRow, i + 1)
+            Exit For
+        ElseIf csvHeader(i) = "UTI ID" Then
+            Set searchPosition = Cells(headerRow, i + 1)
+            Exit For
+        ElseIf csvHeader(i) = "Trade ID" Then
+            Set searchPosition = Cells(headerRow, i + 1)
+            Exit For
+        End If
+    Next i
+    
+    'Application.ScreenUpdating = True
+    
+    If i > UBound(csvHeader) Then
+        MsgBox "Could not find UTI ID/UTI or Trade ID field", vbInformation, "WARNING!"
+        Cells(1, 1).Select
+    Else
+        If IsMissing(buttonIndicator) = False Then Application.ScreenUpdating = True
+        Cells(searchPosition.row, searchPosition.column).Activate
+    End If
+    
+    resetSearchParameters
+    
 End Sub
 Public Function findIt(findThis)
 Cells(1, 1).Select
@@ -104,11 +118,17 @@ niceExit:
 End Function
 
 Public Function precheck()
-foundComment = False
-precheck = True
-Dim message As String
-displayMessage = False
-Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
+    Dim foundComment    As Boolean
+    Dim displayMessage  As Boolean
+    Dim i               As Integer
+    Dim message         As String
+    
+    'Application.ScreenUpdating = False
+    
+    foundComment = False
+    precheck = True
+    displayMessage = False
+    Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
 
    message = "Could not find: " & vbCrLf
     
@@ -123,7 +143,7 @@ Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
     End If
     
     Range("A1").Select
-    For i = 1 To mylastcell.Row
+    For i = 1 To mylastcell.row
         If ActiveCell.Value = "*comment" Then
             foundComment = True
             Exit For
@@ -143,7 +163,7 @@ Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
 
    If displayMessage = True Then
         MsgBox message, vbInformation, "WARNING!"
-        Application.ScreenUpdating = True
+        'Application.ScreenUpdating = True
         Cells(1, 1).Select
         precheck = False
         resetSearchParameters
