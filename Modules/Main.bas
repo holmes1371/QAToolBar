@@ -19,65 +19,91 @@ Sub clearBox(control As IRibbonControl, ByRef returnVal)
 End Sub
 
 Sub ApplyAllFormatting(control As IRibbonControl)
+    Set startCell = startPrep
     autoHeader2
     autoHeaderUniquinizerIngestF
-    finalReset
+    finalReset (startCell)
     'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
 End Sub
 
 Sub autoHeaderIngest(control As IRibbonControl)
+    Dim startCell As Object: Set startCell = startPrep
+    
     autoHeader2
+    Call finalReset(1, 1)
     If endIt = False Then
         Exit Sub
     End If
-    finalReset
+    
+    
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
+    Dim startCell As Object: Set startCell = startPrep
+    
     SheetFixIngestF
     resetSearchParameters
-    finalReset
+    Call finalReset(startCell.row, startCell.column)
 End Sub
 
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
+    Dim startCell As Object: Set startCell = startPrep
+    
     autoHeader2
     SheetFixIngestF
     If endIt = False Then
        Exit Sub
     End If
+    Call finalReset(2, 1)
+    
 End Sub
 
 Sub manualNewUti(control As IRibbonControl)
+    Set startCell = startPrep
     utiMode = "manual"
-    autoHeaderUniquinizerIngestF
+    autoHeaderUniquinizerIngestF ("clicked")
     finalReset
 End Sub
 Sub autoNewUti(control As IRibbonControl)
+    Set startCell = startPrep
     utiMode = "auto"
-    autoHeaderUniquinizerIngestF
+    autoHeaderUniquinizerIngestF ("clicked")
     finalReset
 End Sub
 
 Sub findTradeID(control As IRibbonControl)
+    Dim startCell As Object: Set startCell = startPrep
     SheetFixIngestF
-    findID
-    If foundOne = True Then
-        Application.ScreenUpdating = True
-        Cells(searchPosition.Row, searchPosition.column).Select
-    End If
-    finalReset
+    findID ("clicked")
+    Call finalReset
+    
 End Sub
-Public Function finalReset()
-    resetSearchParameters
-    refreshScreen
-End Function
+
 Public Function resetSearchParameters() 'run this function at the end of each "Main" sub
     'Reset match case and entire contents
     Cells.Replace what:="", Replacement:="", LookAt:=xlPart, _
     SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
     ReplaceFormat:=False
 End Function
-Public Function refreshScreen()
-Application.ScreenUpdating = True
-Application.CutCopyMode = False
+Function startPrep() As Object
+
+    Dim startCell As Object: Set startCell = ActiveCell
+    Set startPrep = startCell
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    
 End Function
+
+Sub finalReset(Optional row As Variant, Optional col As Variant)
+    
+       
+    resetSearchParameters
+    Application.ScreenUpdating = True
+    Application.CutCopyMode = False
+    Application.Calculation = xlCalculationAutomatic
+    
+    If IsMissing(row) = False And IsMissing(col) = False Then
+        Cells(row, col).Activate
+    End If
+        
+End Sub
