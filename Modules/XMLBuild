@@ -269,7 +269,7 @@ While ActiveCell.Value <> Empty
     ActiveCell.Offset(0, 1).Activate
 Wend
 
-size = ActiveCell.column - 2
+size = ActiveCell.Column - 2
 
 ReDim headerVal(size)
 
@@ -284,15 +284,15 @@ getHeaderVals = headerVal
 
 End Function
 
-Function headerSearch(columnName) 'returns column number
-
-For i = 0 To UBound(csvHeader)
-    If csvHeader(i) = columnName Then Exit For
-Next i
-
-headerSearch = i + 1
-
-End Function
+'Function headerSearch(columnName) 'returns column number
+'
+'For i = 0 To UBound(csvHeader)
+'    If csvHeader(i) = columnName Then Exit For
+'Next i
+'
+'headerSearch = i + 1
+'
+'End Function
 
 
 
