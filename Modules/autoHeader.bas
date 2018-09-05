@@ -3,15 +3,14 @@ Public oCode As String
 Option Compare Text
 Option Explicit
 
-
 Public Sub ocodeVal_onChange(control As IRibbonControl, Text As String)
     oCode = Text
 End Sub
 
-Public Function autoHeader2()
+Public Sub autoHeader2()
 
 ' Developed by Tom Holmes tholmes@dtcc.com
-' formats header and trainer to be compliant with BigFish requirements
+' formats header and trailer to be compliant with BigFish requirements
 
     Dim i                   As Integer
     Dim commentLocation     As Integer
@@ -43,7 +42,7 @@ Public Function autoHeader2()
         MsgBox "More than one 'comment' found in row 1. Please verify", vbInformation, "WARNING!"
         endIt = True
         Range("A1").Select
-        Exit Function
+        Exit Sub
     End If
     
     trimmer
@@ -93,7 +92,7 @@ Public Function autoHeader2()
     Range("A1").Select
     SheetFixIngestF
     
-End Function
+End Sub
 
 Function bigFishDate() As String
     Dim dt As Date
