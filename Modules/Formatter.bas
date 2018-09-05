@@ -1,22 +1,19 @@
-Public Function SheetFixIngestF()
+Option Explicit
+Option Compare Text
+
+Public Sub SheetFixIngestF(Optional buttonIndicator As Variant)
 ' Developed DTCC 3APR2017
 ' Nicholas Lopez nlopez@DTCC.com
 ' edited by Tom Holmes tholmes@dtcc.com
 ' Googled meaning of ";@" by Frank Castillo fcastilloandino@dtcc.com
     
-    startCell = ActiveCell.Address
-    'Application.ScreenUpdating = False
+    Dim startCell As Object: Set startCell = ActiveCell
+    
     trimmer
-
-    'makeBland 'removes any coloring or special formatting to the text
 
     'Selects the cell on the first row and first column
     Range("A1").Select
     Selection.NumberFormat = "yyyy-mm-dd;@"
-
-    'Clear formatting
-    'Application.FindFormat.Clear
-    'Application.ReplaceFormat.Clear
 
     'Set formatting
     Application.FindFormat.NumberFormat = "m/d/yyyy"
@@ -48,12 +45,55 @@ Public Function SheetFixIngestF()
     'Clear Formatting
     Application.FindFormat.Clear
     Application.ReplaceFormat.Clear
-    'Application.ScreenUpdating = True
+    
+    If IsMissing(buttonIndicator) = False Then
+        buildBitBucketLinks
+    End If
     
     Columns.AutoFit
-    Range(startCell).Select
+    startCell.Activate
     
-End Function
+End Sub
+
+Sub buildBitBucketLinks()
+  
+  setHeaderVals (1)
+  addTheLinks ("input file")
+  addTheLinks ("expected file")
+
+
+ 'https://code.dtcc.com:8443/projects/GTR/repos/test-automation-data/raw/esma/regression/csv_inputs/297736_INPUT_REGRESSION.csv
+   
+End Sub
+Sub addTheLinks(headerName As String)
+
+    Dim path            As String:  path = "https://code.dtcc.com:8443/projects/GTR/repos/test-automation-data/raw/esma/regression/"
+    Dim testFileType    As String
+    Dim thisCol         As Integer
+
+  thisCol = headerSearch(headerName)
+  
+  If Cells(headerRow, thisCol).Value <> headerName Then Exit Sub
+
+  Cells(headerRow + 1, thisCol).Activate
+  
+  While ActiveCell.Value <> Empty
+    With ActiveCell
+        If .Value Like ("*INPUT*") And .Value Like ("*.csv") Then
+            testFileType = "csv_inputs"
+        ElseIf .Value Like ("*EXPECT*") And .Value Like ("*.csv") Then
+            testFileType = "csv_expects"
+        ElseIf .Value Like ("*INPUT*") And .Value Like ("*.xml") Then
+            testFileType = "fpml_inputs"
+        ElseIf .Value Like ("*EXPECT*") And .Value Like ("*.xml") Then
+            testFileType = "csv_expects"
+        End If
+       ActiveSheet.Hyperlinks.Add Cells(.row, .Column), path & testFileType & "/" & .Value
+       .Offset(1, 0).Select
+    End With
+  Wend
+
+End Sub
 
 Function makeBland()
 
