@@ -2,204 +2,236 @@ Option Compare Text
 
 Sub optiontest()
 
-Dim xDoc As Object
+    Dim xDoc As Object
+    Dim fileName As String
+    Dim xmlVersion2 As MSXML2.IXMLDOMProcessingInstruction
+        
+    fileName = "C:\Users\tholmes\temp dev sheets\XMLs\genesisXML.xml"
+    Set xDoc = CreateObject("MSXML2.DOMDocument")
+    Set xmlVersion2 = xDoc.createProcessingInstruction("xml", "version='1.0' encoding='UTF-8'")
+    xDoc.appendChild xmlVersion2
+    Set root2 = xDoc.createElement("nonpublicExecutionReport")
+    xDoc.appendChild root2
 
-Set xDoc = CreateObject("MSXML2.DOMDocument")
-Dim xmlVersion2 As MSXML2.IXMLDOMProcessingInstruction
-Set xmlVersion2 = xDoc.createProcessingInstruction("xml", "version='1.0' encoding='UTF-8'")
-xDoc.appendChild xmlVersion2
-Set root2 = xDoc.createElement("nonpublicExecutionReport")
-xDoc.appendChild root2
-
-Call addPublicAttribs(xDoc)
-'start Header
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "header", "", "", "")
-Call addSomeNode(xDoc, "header", "messageId", "GQ_UNDERWEAR", "messageIdScheme", "http://www.credit-suisse.com/msg_id")
-Call addSomeNode(xDoc, "header", "sentBy", "549300F1Z7U9FV7APM14", "messageAddressScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
-Call addSomeNode(xDoc, "header", "sendTo", "DTCCEU", "", "")
-Call addSomeNode(xDoc, "header", "creationTimestamp", "2017-06-26T15:20:07Z", "", "")
-Call addSomeNode(xDoc, "header", "implementationSpecification", "", "", "")
-Call addSomeNode(xDoc, "implementationSpecification", "version", "CA4.0CO1.8", "implementationSpecificationVersionScheme", "http://www.dtcc.com")
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "isCorrection", "False", "", "")
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "correlationId", "Trade", "correlationIdScheme", "http://www.credit-suisse.com/msg_id")
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "onBehalfOf", "", "", "")
-Call addSomeNode(xDoc, "onBehalfOf", "partyReference", "", "href", "PARTY1")
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "onBehalfOf", "", "", "")
-Call addSomeNode(xDoc, "onBehalfOf", "partyReference", "", "href", "PARTY2")
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "originatingEvent", "Trade", "", "")
-'end header
-
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "trade", "", "", "") ' trade node place keeper
-
-'start <quote> block
-'141
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "id", "TradeNotionalAmount")
-Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "P", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "USD", "", "")
-Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
-
-'147
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "id", "RealTimeNotionalAmount")
-Call addSomeNode(xDoc, "quote", "value", "0.0000", "", "")
-Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
-
-'151
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "0.01829", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "PriceMultiplier", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "AUD", "", "")
-
-'156
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "PriceNotation1", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "Units", "", "")
-Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
-
-'162
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "PriceNotation", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "Units", "", "")
-Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
-
-'169
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "DeliveryPointOrZone", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "10Z1001A1001A01T", "", "")
-
-
-'176
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "InterconnectionPoint", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "10Z1001A1001A01T", "", "")
-
-
-'182
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "DaysOfTheWeek", "", "")
-Call addSomeNode(xDoc, "quote", "timing", "MO", "", "")
-
-
-'187
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "415294", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "DeliveryCapacity", "", "")
-
-
-'192
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "DeliveryStartDateAndTime", "", "")
-Call addSomeNode(xDoc, "quote", "time", "2017-06-26T15:20:07Z", "", "")
-
-
-'197
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "DeliveryEndDateAndTime", "", "")
-Call addSomeNode(xDoc, "quote", "time", "2017-06-26T15:20:07Z", "", "")
-
-
-'202
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "Duration", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "N", "", "")
-
-
-'207
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "LoadDeliveryIntervals", "", "")
-Call addSomeNode(xDoc, "quote", "timing", "10:12Z", "", "")
-
-
-'212
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "LoadType", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "BL", "", "")
-
-
-'217
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "415294", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "PriceTimeIntervalQuantities", "", "")
-
-
-'221
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
-Call addSomeNode(xDoc, "quote", "value", "0.01829", "", "")
-Call addSomeNode(xDoc, "quote", "measureType", "QuantityEMIR", "", "")
-Call addSomeNode(xDoc, "quote", "quoteUnits", "KW", "", "")
-
-
-'226 PARTY1 details
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "PARTY1")
-Call addSomeNode(xDoc, "party", "partyid", "549300F1Z7U9FV7APM14", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
-Call addSomeNode(xDoc, "party", "partyName", "Credit Suisse International", "", "")
-Call addSomeNode(xDoc, "party", "classification", "CreditInstitution-InsuranceUndertaking", "industryClassificationScheme", "http://www.fpml.org/coding-scheme/regulatory-corporate-sector")
-Call addSomeNode(xDoc, "party", "region", "EEA", "", "")
-Call addSomeNode(xDoc, "party", "contactInfo", "", "", "")
-Call addSomeNode(xDoc, "contactInfo", "address", "", "", "")
-Call addSomeNode(xDoc, "address", "country", "FR", "", "")
-Call addSomeNode(xDoc, "party", "businessUnit", "", "", "")
-Call addSomeNode(xDoc, "businessUnit", "country", "GB", "", "")
-
-
-'240 PARTY2 details
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "PARTY2")
-Call addSomeNode(xDoc, "party", "partyid", "213800Q92SEINC1E9989", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
-Call addSomeNode(xDoc, "party", "partyName", "Deutsche Bank AG", "", "")
-Call addSomeNode(xDoc, "party", "region", "EEA", "", "")
-Call addSomeNode(xDoc, "party", "contactInfo", "", "", "")
-Call addSomeNode(xDoc, "contactInfo", "address", "", "", "")
-Call addSomeNode(xDoc, "address", "country", "GB", "", "")
-Call addSomeNode(xDoc, "party", "businessUnit", "", "", "")
-Call addSomeNode(xDoc, "businessUnit", "country", "GBR", "", "")
-
-
-'253 Execution venue
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "ExecutionVenue")
-Call addSomeNode(xDoc, "party", "partyid", "BMFM", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/mifir/extension-iso10383")
-
-
-'256 Asset Management Company
-Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "AssetMgmtCo")
-Call addSomeNode(xDoc, "party", "partyid", "549300F1Z7U9FV7APM14", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
-
-
-xDoc.Save ("C:\Users\tholmes\temp dev sheets\XMLs\genesisXML.xml")
-
-Set xDoc = Nothing
+    'Start Header
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "header", "", "", "")
+    Call addSomeNode(xDoc, "header", "messageId", "GQ_UNDERWEAR", "messageIdScheme", "http://www.credit-suisse.com/msg_id")
+    Call addSomeNode(xDoc, "header", "sentBy", "549300F1Z7U9FV7APM14", "messageAddressScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
+    Call addSomeNode(xDoc, "header", "sendTo", "DTCCEU", "", "")
+    Call addSomeNode(xDoc, "header", "creationTimestamp", "2017-06-26T15:20:07Z", "", "")
+    Call addSomeNode(xDoc, "header", "implementationSpecification", "", "", "")
+    Call addSomeNode(xDoc, "implementationSpecification", "version", "CA4.0CO1.8", "implementationSpecificationVersionScheme", "http://www.dtcc.com")
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "isCorrection", "false", "", "")
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "correlationId", "Trade", "correlationIdScheme", "http://www.credit-suisse.com/msg_id")
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "onBehalfOf", "", "", "")
+    Call addSomeNode(xDoc, "onBehalfOf", "partyReference", "", "href", "PARTY1")
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "onBehalfOf", "", "", "")
+    Call addSomeNode(xDoc, "onBehalfOf", "partyReference", "", "href", "PARTY2")
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "originatingEvent", "Trade", "", "")
+    'end header
+    
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "trade", "", "", "") ' trade node place keeper
+    
+    'start <quote> block
+    '141
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "id", "TradeNotionalAmount")
+    Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "P", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "USD", "", "")
+    Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
+    
+    '147
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "id", "RealTimeNotionalAmount")
+    Call addSomeNode(xDoc, "quote", "value", "0.0000", "", "")
+    Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
+    
+    '151
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "0.01829", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "PriceMultiplier", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "AUD", "", "")
+    
+    '156
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "PriceNotation1", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "Units", "", "")
+    Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
+    
+    '162
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "415294.0", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "PriceNotation", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "Units", "", "")
+    Call addSomeNode(xDoc, "quote", "currency", "USD", "", "")
+    
+    '169
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "DeliveryPointOrZone", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "10Z1001A1001A01T", "", "")
+    
+    
+    '176
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "InterconnectionPoint", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "10Z1001A1001A01T", "", "")
+    
+    
+    '182
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "DaysOfTheWeek", "", "")
+    Call addSomeNode(xDoc, "quote", "timing", "MO", "", "")
+    
+    
+    '187
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "415294", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "DeliveryCapacity", "", "")
+    
+    
+    '192
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "DeliveryStartDateAndTime", "", "")
+    Call addSomeNode(xDoc, "quote", "time", "2017-06-26T15:20:07Z", "", "")
+    
+    
+    '197
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "DeliveryEndDateAndTime", "", "")
+    Call addSomeNode(xDoc, "quote", "time", "2017-06-26T15:20:07Z", "", "")
+    
+    
+    '202
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "Duration", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "N", "", "")
+    
+    
+    '207
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "LoadDeliveryIntervals", "", "")
+    Call addSomeNode(xDoc, "quote", "timing", "10:12Z", "", "")
+    
+    
+    '212
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "LoadType", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "BL", "", "")
+    
+    
+    '217
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "415294", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "PriceTimeIntervalQuantities", "", "")
+    
+    
+    '221
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "quote", "", "", "")
+    Call addSomeNode(xDoc, "quote", "value", "0.01829", "", "")
+    Call addSomeNode(xDoc, "quote", "measureType", "QuantityEMIR", "", "")
+    Call addSomeNode(xDoc, "quote", "quoteUnits", "KW", "", "")
+    
+    
+    '226 PARTY1 details
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "PARTY1")
+    Call addSomeNode(xDoc, "party", "partyId", "549300F1Z7U9FV7APM14", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
+    Call addSomeNode(xDoc, "party", "partyName", "Credit Suisse International", "", "")
+    Call addSomeNode(xDoc, "party", "classification", "CreditInstitution-InsuranceUndertaking", "industryClassificationScheme", "http://www.fpml.org/coding-scheme/regulatory-corporate-sector")
+    Call addSomeNode(xDoc, "party", "region", "EEA", "", "")
+    Call addSomeNode(xDoc, "party", "contactInfo", "", "", "")
+    Call addSomeNode(xDoc, "contactInfo", "address", "", "", "")
+    Call addSomeNode(xDoc, "address", "country", "FR", "", "")
+    Call addSomeNode(xDoc, "party", "businessUnit", "", "", "")
+    Call addSomeNode(xDoc, "businessUnit", "country", "GB", "", "")
+    
+    
+    '240 PARTY2 details
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "PARTY2")
+    Call addSomeNode(xDoc, "party", "partyId", "213800Q92SEINC1E9989", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
+    Call addSomeNode(xDoc, "party", "partyName", "Deutsche Bank AG", "", "")
+    Call addSomeNode(xDoc, "party", "region", "EEA", "", "")
+    Call addSomeNode(xDoc, "party", "contactInfo", "", "", "")
+    Call addSomeNode(xDoc, "contactInfo", "address", "", "", "")
+    Call addSomeNode(xDoc, "address", "country", "GB", "", "")
+    Call addSomeNode(xDoc, "party", "businessUnit", "", "", "")
+    Call addSomeNode(xDoc, "businessUnit", "country", "GBR", "", "")
+    
+    
+    '253 Execution venue
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "ExecutionVenue")
+    Call addSomeNode(xDoc, "party", "partyId", "BMFM", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/mifir/extension-iso10383")
+    
+    
+    '256 Asset Management Company
+    Call addSomeNode(xDoc, "nonpublicExecutionReport", "party", "", "id", "AssetMgmtCo")
+    Call addSomeNode(xDoc, "party", "partyId", "549300F1Z7U9FV7APM14", "partyIdScheme", "http://www.fpml.org/coding-scheme/external/iso17442")
+    
+    Call addPublicAttribs(xDoc)
+    
+    xDoc.Save (fileName)
+    
+    cleanUp (fileName)
+    Set xDoc = Nothing
 
 End Sub
+Function cleanUp(fileName As String)
+
+Dim objFSO
+Const ForReading = 1
+Const ForWriting = 2
+Dim objTS
+Dim strContents As String
+
+Set objFSO = CreateObject("Scripting.FileSystemObject")
+Set objTS = objFSO.OpenTextFile(fileName, ForReading)
+strContents = objTS.ReadAll
+strContents = Replace(strContents, " xmlns=" & Chr(34) & Chr(34), "")
+objTS.Close
+
+Set objTS = objFSO.OpenTextFile(fileName, ForWriting)
+objTS.Write strContents
+objTS.Close
+
+End Function
+
 
 Function addSomeNode(xmlSource As DOMDocument, parentTag, newTag, values, attribName As String, attributeDescription As String)
+    
+    Dim singleNode As Object
+    Dim levels As Integer
 
-Dim singleNode As Object
+    levels = 0
+    Set singleNode = xmlSource.SelectSingleNode("//" & parentTag)
+    Set addTest = xmlSource.createElement(newTag)
+    Set getAncestor = singleNode.ParentNode
 
-Set singleNode = xmlSource.SelectSingleNode("//" & parentTag)
-Set addTest = xmlSource.createElement(newTag)
-Set getNextSibling = singleNode.NextSibling
-
-    If getNextSibling Is Nothing Then
-    singleNode.appendChild (addTest)
+    If getAncestor.BaseName = "" Then
+        Set getAncestor = getAncestor.LastChild
     Else
-    Set getGrandParent = singleNode.ParentNode
-    Set singleNode = getGrandParent.LastChild
-    singleNode.appendChild (addTest)
+        While getAncestor.BaseName <> ""
+            levels = levels + 1
+           Set getAncestor = getAncestor.ParentNode
+        Wend
+        
+        For i = 0 To levels
+             Set getAncestor = getAncestor.LastChild
+        Next i
     End If
+            
+    getAncestor.appendChild (addTest)
 
-If values <> "" Then
-    Set getLastAddition = singleNode.LastChild
-    getLastAddition.Text = values
-End If
-
-If attribName <> "" And attributeDescription <> "" Then
-   Dim rel As Object
-   Set rel = xmlSource.createAttribute(attribName)
-   rel.NodeValue = attributeDescription
-   Set getLastChild = singleNode.LastChild
-   getLastChild.setAttributeNode rel
-End If
+    If values <> "" Then
+        Set getLastAddition = getAncestor.LastChild
+        getLastAddition.Text = values
+    End If
+    
+    If attribName <> "" And attributeDescription <> "" Then
+       Dim rel As Object
+       Set rel = xmlSource.createAttribute(attribName)
+       rel.NodeValue = attributeDescription
+       Set getLastChild = getAncestor.LastChild
+       getLastChild.setAttributeNode rel
+    End If
 
 End Function
 
@@ -221,4 +253,46 @@ Call addAttribute(xmlSource, "nonpublicExecutionReport", "xmlns:dtcc", "http://w
 Call addAttribute(xmlSource, "nonpublicExecutionReport", "xmlns:ns3", "http://www.w3.org/2000/09/xmldsig#")
 
 End Function
+
+Function getHeaderVals()
+
+Dim headerVal() As String, size As Integer, i As Integer
+Cells(1, 1).Activate
+
+While ActiveCell.Value <> "*comment"
+    ActiveCell.Offset(1, 0).Activate
+Wend
+headerRow = ActiveCell.row
+
+
+While ActiveCell.Value <> Empty
+    ActiveCell.Offset(0, 1).Activate
+Wend
+
+size = ActiveCell.Column - 2
+
+ReDim headerVal(size)
+
+Cells(headerRow, 1).Activate
+
+For i = 0 To UBound(headerVal)
+    headerVal(i) = ActiveCell.Value
+    ActiveCell.Offset(0, 1).Activate
+Next i
+
+getHeaderVals = headerVal
+
+End Function
+
+'Function headerSearch(columnName) 'returns column number
+'
+'For i = 0 To UBound(csvHeader)
+'    If csvHeader(i) = columnName Then Exit For
+'Next i
+'
+'headerSearch = i + 1
+'
+'End Function
+
+
 

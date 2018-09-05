@@ -1,31 +1,36 @@
-Option Compare Text
 Public oCode As String
+
+Option Compare Text
+Option Explicit
+
 Public Sub ocodeVal_onChange(control As IRibbonControl, Text As String)
     oCode = Text
 End Sub
 
-Public Function autoHeader2()
+Public Sub autoHeader2()
 
 ' Developed by Tom Holmes tholmes@dtcc.com
-' Emotional counselor: Frank
-' formats header and trainer to be compliant with BigFish requirements
+' formats header and trailer to be compliant with BigFish requirements
+
+    Dim i                   As Integer
+    Dim commentLocation     As Integer
+    Dim foundIt             As Boolean
+    Dim count               As Integer
+    Dim bigFishHeader       As String
     
-    startCell = ActiveCell.Address
-    Application.ScreenUpdating = False
-    
-    Dim commentLocation
-    Dim foundIt
-    Dim count
-    
+    'Application.ScreenUpdating = False
+ 
     foundIt = False
     count = 0
         
     trimmer
+    
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
         
     'prevents formatting if more than one cell in row 1 is "*comment"
+    
     Range("A1").Select
-    For i = 1 To mylastcell.Row
+    For i = 1 To mylastcell.row
         If (ActiveCell.Value = "*comment") Or (ActiveCell.Value = "comment") Then
             count = count + 1
         End If
@@ -33,19 +38,19 @@ Public Function autoHeader2()
     Next i
     
     If count >= 2 Then
-        Application.ScreenUpdating = True
+        'Application.ScreenUpdating = True
         MsgBox "More than one 'comment' found in row 1. Please verify", vbInformation, "WARNING!"
         endIt = True
         Range("A1").Select
-        Exit Function
+        Exit Sub
     End If
     
     trimmer
     
     Range("A1").Select
-    For i = 1 To mylastcell.Row
+    For i = 1 To mylastcell.row
         If ActiveCell.Value = "*comment" Then    'formatting check. Will only apply the header if "*Comment" is found
-        commentLocation = ActiveCell.Row
+        commentLocation = ActiveCell.row
         foundIt = True
         Exit For
         End If
@@ -74,27 +79,31 @@ Public Function autoHeader2()
             ActiveCell.Offset(1, 0).Activate
         Wend
 
-        Cells(ActiveCell.Row, 1).Value = "*" & getOcode & "-END"
-        
-        Range(startCell).Select
+        Cells(ActiveCell.row, 1).Value = "*" & getOcode & "-END"
+         
     Else
         Range("A1").Select
         MsgBox "No '*Comment' box found in Row 1. Please verify this is the correct sheet you want to format", _
         vbInformation, "WARNING!"
         endIt = True
     End If
-    Application.ScreenUpdating = True
+    
+    'Application.ScreenUpdating = True
     Range("A1").Select
     SheetFixIngestF
-End Function
+    
+End Sub
 
 Function bigFishDate() As String
     Dim dt As Date
     Dim tdate As String
+    Dim fdate As String
+    
     dt = Date
     fdate = Format(dt, "yyyy-mm-dd")          'Formats date to yyyy-mm-dd
     tdate = CStr(fdate)                       'Converts Date to string
-    bigFishDate = tdate                        'Saves converted date string to function return
+    bigFishDate = tdate                       'Saves converted date string to function return
+    
 End Function
 Function getOcode()
     

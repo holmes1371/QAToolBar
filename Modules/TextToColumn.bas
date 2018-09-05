@@ -14,7 +14,7 @@ Public Sub textToCol(control As IRibbonControl)
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
  
     'Set up the range
-    Set objRange1 = Range("A1:A" & mylastcell.Row)
+    Set objRange1 = Range("A1:A" & mylastcell.row)
     
    'Do the parse
     objRange1.TextToColumns _

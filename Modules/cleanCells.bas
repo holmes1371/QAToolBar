@@ -1,20 +1,23 @@
-Public Function trimmer()
-    Application.ScreenUpdating = False
-    Set startCell = ActiveCell
+Option Explicit
+Public Sub trimmer()
 
+    Dim startCell   As Object: Set startCell = ActiveCell
+    Dim thisSheet   As Range
+    Dim cel         As Range
+            
     Set mylastcell = Cells(1, 1).SpecialCells(xlLastCell)
-    Dim thisSheet As Range
-    Set thisSheet = Range(Cells(1, 1).Address(), Cells(mylastcell.Row, mylastcell.column).Address())
     
-    Dim cel As Range
+    Set thisSheet = Range(Cells(1, 1).Address(), Cells(mylastcell.row, mylastcell.Column).Address())
     
-        For Each cel In thisSheet.Cells
-            On Error GoTo skipIt
-            With cel
-                If Trim(.Value) = Empty Then GoTo skipIt
-                .Value = Trim(.Value)
-            End With
+    For Each cel In thisSheet.Cells
+        On Error GoTo skipIt
+        With cel
+            If Trim(.Value) = Empty Then GoTo skipIt
+            .Value = Trim(.Value)
+        End With
 skipIt:
-        Next cel
-End Function
+    Next cel
+        
+        
+End Sub
 
