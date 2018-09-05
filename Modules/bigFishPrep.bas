@@ -20,16 +20,15 @@ Sub splitFiles(control As IRibbonControl)
     Dim retVal          As Variant
     
     setStartVals
-
+    If preCheck = False Then Exit Sub
     utiMode = "auto"
     
-    setHeaderVals
     Application.ScreenUpdating = True
     On Error GoTo softExit
     splitOptions = SplitSelector(csvHeader)
+    Application.ScreenUpdating = False
     
     If endIt = True Then
-        refreshScreen
         Exit Sub
     End If
     
@@ -38,8 +37,6 @@ Sub splitFiles(control As IRibbonControl)
     autoHeaderUniquinizerIngestF
     progressBarMessage
     
-    Application.ScreenUpdating = False
-
     Call splitThisSheet(ActiveSheet.Name, splitOptions)
     
     verifyFinal (splitOptions)
@@ -59,6 +56,9 @@ Sub splitFiles(control As IRibbonControl)
     prepMode = False
     
 softExit:
+    
+    Application.ScreenUpdating = True
+    
 End Sub
 
 Function splitThisSheet(sheetName As String, criteria)
@@ -66,8 +66,7 @@ Function splitThisSheet(sheetName As String, criteria)
     Dim opt             As Variant
     Dim tempUnique()    As String
     Dim i               As Integer
-    
-    
+        
     Sheets(sheetName).Activate
 
     For Each opt In criteria
@@ -92,6 +91,7 @@ skipIt:
 End Function
 
 Function createRandomPrefix() As String
+
     Dim i           As Integer
     Dim thisPrefix  As String
     
@@ -202,7 +202,7 @@ Function getNamePart(criteria, sheetName As String)
         
     Const SpecialCharacters As String = "!,@,#,$,%,^,&,*,(,),{,[,],},?,-,~,/,\,:"
     
-    thisPath = ActiveWorkbook.Path & "\"
+    thisPath = ActiveWorkbook.path & "\"
     startSheet = ActiveSheet.Name
     Sheets(sheetName).Activate
     testName = getUnique("*comment", ActiveSheet.Name)
@@ -280,26 +280,27 @@ Sub createTempSheet(tempSheet As String)
     Sheets(startSheet).Activate
 End Sub
 
-Public Function setHeaderVals()
+Public Function setHeaderVals(Optional bitBucket As Variant)
 
     Dim headerVal()  As String
     Dim size         As Integer
     Dim i            As Integer
     
-    'Application.ScreenUpdating = False
     Cells(1, 1).Activate
     
-    While ActiveCell.Value <> "*comment"
-        ActiveCell.Offset(1, 0).Activate
-    Wend
+    If IsMissing(bitBucket) = True Then
+        While ActiveCell.Value <> "*comment"
+            ActiveCell.Offset(1, 0).Activate
+        Wend
+    End If
+    
     headerRow = ActiveCell.row
-    
-    
+       
     While ActiveCell.Value <> Empty
         ActiveCell.Offset(0, 1).Activate
     Wend
     
-    size = ActiveCell.column - 2
+    size = ActiveCell.Column - 2
     
     ReDim headerVal(size)
     
@@ -311,8 +312,6 @@ Public Function setHeaderVals()
     Next i
     
     csvHeader = headerVal
-    
-    ''Application.ScreenUpdating = True
 
 End Function
 Function getUnique(x, currentSheet)
@@ -397,7 +396,7 @@ End Sub
 
 Function getpath() As String
 
-    getpath = ActiveWorkbook.Path & "\"
+    getpath = ActiveWorkbook.path & "\"
     
 End Function
 Function getPasteRow(sheetName)
@@ -475,7 +474,7 @@ Function getAssClassCol()
     Dim startCell As Object: Set startCell = ActiveCell
     
     findAssetClass
-    getAssClassCol = ActiveCell.column
+    getAssClassCol = ActiveCell.Column
     startCell.Activate
 
 End Function
@@ -580,5 +579,6 @@ Function setStartVals()
     fileCount = 0
     tempSheet = 0
     randPrefix = createRandomPrefix
+    Application.ScreenUpdating = False
 
 End Function
