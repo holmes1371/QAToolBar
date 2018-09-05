@@ -3,11 +3,11 @@ Option Compare Text
 Sub optiontest()
 
     Dim xDoc As Object
-    Dim filename As String
-    
-    filename = "C:\Users\tholmes\temp dev sheets\XMLs\genesisXML.xml"
-    Set xDoc = CreateObject("MSXML2.DOMDocument")
+    Dim fileName As String
     Dim xmlVersion2 As MSXML2.IXMLDOMProcessingInstruction
+        
+    fileName = "C:\Users\tholmes\temp dev sheets\XMLs\genesisXML.xml"
+    Set xDoc = CreateObject("MSXML2.DOMDocument")
     Set xmlVersion2 = xDoc.createProcessingInstruction("xml", "version='1.0' encoding='UTF-8'")
     xDoc.appendChild xmlVersion2
     Set root2 = xDoc.createElement("nonpublicExecutionReport")
@@ -168,29 +168,27 @@ Sub optiontest()
     
     Call addPublicAttribs(xDoc)
     
-    xDoc.Save (filename)
+    xDoc.Save (fileName)
     
-    cleanUp (filename)
+    cleanUp (fileName)
     Set xDoc = Nothing
 
 End Sub
-Function cleanUp(filename)
+Function cleanUp(fileName As String)
 
 Dim objFSO
 Const ForReading = 1
 Const ForWriting = 2
-Dim objTS 'define a TextStream object
+Dim objTS
 Dim strContents As String
-Dim fileSpec As String
 
-fileSpec = filename
 Set objFSO = CreateObject("Scripting.FileSystemObject")
-Set objTS = objFSO.OpenTextFile(fileSpec, ForReading)
+Set objTS = objFSO.OpenTextFile(fileName, ForReading)
 strContents = objTS.ReadAll
 strContents = Replace(strContents, " xmlns=" & Chr(34) & Chr(34), "")
 objTS.Close
 
-Set objTS = objFSO.OpenTextFile(fileSpec, ForWriting)
+Set objTS = objFSO.OpenTextFile(fileName, ForWriting)
 objTS.Write strContents
 objTS.Close
 
@@ -198,14 +196,13 @@ End Function
 
 
 Function addSomeNode(xmlSource As DOMDocument, parentTag, newTag, values, attribName As String, attributeDescription As String)
-
-Dim singleNode As Object
-Dim levels As Integer
+    
+    Dim singleNode As Object
+    Dim levels As Integer
 
     levels = 0
     Set singleNode = xmlSource.SelectSingleNode("//" & parentTag)
     Set addTest = xmlSource.createElement(newTag)
-    Set getNextSibling = singleNode.NextSibling
     Set getAncestor = singleNode.ParentNode
 
     If getAncestor.BaseName = "" Then
@@ -223,7 +220,6 @@ Dim levels As Integer
             
     getAncestor.appendChild (addTest)
 
-
     If values <> "" Then
         Set getLastAddition = getAncestor.LastChild
         getLastAddition.Text = values
@@ -236,7 +232,6 @@ Dim levels As Integer
        Set getLastChild = getAncestor.LastChild
        getLastChild.setAttributeNode rel
     End If
-
 
 End Function
 
@@ -267,14 +262,14 @@ Cells(1, 1).Activate
 While ActiveCell.Value <> "*comment"
     ActiveCell.Offset(1, 0).Activate
 Wend
-headerRow = ActiveCell.Row
+headerRow = ActiveCell.row
 
 
 While ActiveCell.Value <> Empty
     ActiveCell.Offset(0, 1).Activate
 Wend
 
-size = ActiveCell.column - 2
+size = ActiveCell.Column - 2
 
 ReDim headerVal(size)
 
@@ -289,15 +284,15 @@ getHeaderVals = headerVal
 
 End Function
 
-Function headerSearch(columnName) 'returns column number
-
-For i = 0 To UBound(csvHeader)
-    If csvHeader(i) = columnName Then Exit For
-Next i
-
-headerSearch = i + 1
-
-End Function
+'Function headerSearch(columnName) 'returns column number
+'
+'For i = 0 To UBound(csvHeader)
+'    If csvHeader(i) = columnName Then Exit For
+'Next i
+'
+'headerSearch = i + 1
+'
+'End Function
 
 
 
