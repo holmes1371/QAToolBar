@@ -1,11 +1,12 @@
-'QA Toolbar, v. 1.4
+'QA Toolbar, 'LittleMacrol' v. 1.0
 'Developed by Tom Holmes and Frank Castillo
 'Dtd: 08/15/2018
 
+Public endIt        As Boolean              'these are catch variables which allow a function to terminate the sub
+Public abortIt      As Boolean
+Public MyRibbon     As IRibbonUI
+
 Option Compare Text
-Public endIt               'these are catch variables which allow a function to terminate the sub
-Public abortIt
-Public MyRibbon As IRibbonUI
 
 Sub OnRibbonLoad(ribbonUI As IRibbonUI)
     Set MyRibbon = ribbonUI
@@ -18,36 +19,33 @@ Sub clearBox(control As IRibbonControl, ByRef returnVal)
     End Select
 End Sub
 
-Sub ApplyAllFormatting(control As IRibbonControl)
-    Set startCell = startPrep
-    autoHeader2
-    autoHeaderUniquinizerIngestF
-    finalReset (startCell)
-    'ActiveWorkbook.Save 'uncomment this line to activate the autosave function.
-End Sub
-
 Sub autoHeaderIngest(control As IRibbonControl)
+
     Dim startCell As Object: Set startCell = startPrep
+    If preCheck = False Then Exit Sub
     
     autoHeader2
     Call finalReset(1, 1)
     If endIt = False Then
         Exit Sub
     End If
-    
-    
+        
 End Sub
 
 Sub SheetFixIngest(control As IRibbonControl)
+
     Dim startCell As Object: Set startCell = startPrep
+    'If preCheck = False Then Exit Sub
     
-    SheetFixIngestF
+    SheetFixIngestF ("clicked")
     resetSearchParameters
-    Call finalReset(startCell.row, startCell.column)
+    Call finalReset(startCell.row, startCell.Column)
+    
 End Sub
 
 Sub autoHeaderFormatterIngest(control As IRibbonControl)
     Dim startCell As Object: Set startCell = startPrep
+    If preCheck = False Then Exit Sub
     
     autoHeader2
     SheetFixIngestF
@@ -59,13 +57,19 @@ Sub autoHeaderFormatterIngest(control As IRibbonControl)
 End Sub
 
 Sub manualNewUti(control As IRibbonControl)
-    Set startCell = startPrep
+    Dim startCell As Object: Set startCell = startPrep
+    If preCheck = False Then Exit Sub
+    
+    setHeaderVals
     utiMode = "manual"
     autoHeaderUniquinizerIngestF ("clicked")
     finalReset
 End Sub
 Sub autoNewUti(control As IRibbonControl)
-    Set startCell = startPrep
+    Dim startCell As Object: Set startCell = startPrep
+    If preCheck = False Then Exit Sub
+    
+    setHeaderVals
     utiMode = "auto"
     autoHeaderUniquinizerIngestF ("clicked")
     finalReset
@@ -73,6 +77,9 @@ End Sub
 
 Sub findTradeID(control As IRibbonControl)
     Dim startCell As Object: Set startCell = startPrep
+    If preCheck = False Then Exit Sub
+    
+    setHeaderVals
     SheetFixIngestF
     findID ("clicked")
     Call finalReset
@@ -95,8 +102,7 @@ Function startPrep() As Object
 End Function
 
 Sub finalReset(Optional row As Variant, Optional col As Variant)
-    
-       
+        
     resetSearchParameters
     Application.ScreenUpdating = True
     Application.CutCopyMode = False
